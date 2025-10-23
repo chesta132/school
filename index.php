@@ -36,7 +36,7 @@ $result = $conn->query($sql);
     <tr>
       <th>ID</th>
       <th>Nama Siswa</th>
-      <th>Jurusan</th>
+      <th>Fakultas</th>
       <th>Angkatan</th>
       <th>Nilai Akhir</th>
     </tr>
@@ -45,7 +45,7 @@ $result = $conn->query($sql);
         <tr>
           <td><?= htmlspecialchars($row["id"]) ?></td>
           <td><?= htmlspecialchars($row["nama"]) ?></td>
-          <td><?= htmlspecialchars($row["jurusan"]) ?></td>
+          <td><?= htmlspecialchars($row["fakultas"]) ?></td>
           <td><?= htmlspecialchars($row["angkatan"]) ?></td>
           <td><?= htmlspecialchars($row["nilai_akhir"]) ?></td>
         </tr>
@@ -60,3 +60,4 @@ $result = $conn->query($sql);
 <?php
 $conn->close();
 ?>
+
