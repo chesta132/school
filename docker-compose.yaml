@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # PHP 7.4 with Apache
+  web:
+    image: php:7.4-apache
+    container_name: sekolah_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - sekolah_network
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=db_sekolah
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root123
+    command: >
+      bash -c "docker-php-ext-install mysqli pdo pdo_mysql
+      && apache2-foreground"
+
+  # MySQL 5.7
+  db:
+    image: mysql:5.7
+    container_name: sekolah_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./setup_database.sql:/docker-entrypoint-initdb.d/setup_database.sql
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: db_sekolah
+    networks:
+      - sekolah_network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # PHPMyAdmin (optional, buat manage database)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: sekolah_phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root123
+    depends_on:
+      - db
+    networks:
+      - sekolah_network
+
+networks:
+  sekolah_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
