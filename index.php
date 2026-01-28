@@ -59,6 +59,7 @@ $result = $stmt->get_result();
                         ?>
                     </div>
                 </div>
+                <a href="/profile" class="btn-logout" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Profile</a>
                 <a href="/logout" class="btn-logout">Logout</a>
             </div>
         </div>

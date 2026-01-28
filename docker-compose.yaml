@@ -19,7 +19,12 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=root123
     command: >
-      bash -c "docker-php-ext-install mysqli pdo pdo_mysql
+      bash -c "apt-get update
+      && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev zlib1g-dev
+      && docker-php-ext-configure gd --with-freetype --with-jpeg
+      && docker-php-ext-install mysqli pdo pdo_mysql gd
+      && chown -R www-data:www-data /var/www/html/uploads || true
+      && chmod -R 777 /var/www/html/uploads || true
       && apache2-foreground"
 
   # MySQL 5.7
