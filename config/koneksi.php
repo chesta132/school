@@ -1,10 +1,10 @@
 <?php
 // Konfigurasi Database
-// Kalo pake Docker, host nya 'db', kalo lokal pake 'localhost'
-define('DB_HOST', getenv('MYSQL_HOST') ?: 'localhost');
-define('DB_USER', 'root');
-// Pake root123 buat docker, kosong buat local
-define('DB_PASS', getenv('MYSQL_HOST') ? 'root123' : '');
+// Kalo pake Docker, host nya 'db', kalo lokal pake '10.10.6.10'
+define('DB_HOST', getenv('MYSQL_HOST') ?: '10.10.6.10');
+define('DB_USER', getenv('MYSQL_USER') ?: 'admin');
+// Pake root123 buat docker
+define('DB_PASS', getenv('MYSQL_HOST') ? 'root123' : 'password123');
 define('DB_NAME', 'db_sekolah');
 
 // Bikin koneksi
