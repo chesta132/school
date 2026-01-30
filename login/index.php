@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once '../config/koneksi.php';
+require_once '../config/koneksi.php'; 
+require_once '../config/kelas_config.php';
 
 // Kalo udah login, redirect ke dashboard
 if (isset($_SESSION['user_id'])) {
@@ -19,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Email dan password harus diisi!';
     } else {
         // Cari user di database
-        $stmt = $conn->prepare("SELECT id, nama, email, password, kelas, jurusan, angkatan FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT id, nama, email, password, kelas, nomor_kelas, jurusan, angkatan FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -32,8 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['nama'] = $user['nama'];
                 $_SESSION['email'] = $user['email'];
-                $_SESSION['kelas'] = $user['kelas'];
+                $_SESSION['kelas'] = buildKelas($user['kelas'], $user['jurusan'], $user['nomor_kelas']);
                 $_SESSION['jurusan'] = $user['jurusan'];
+                $_SESSION['nomor_kelas'] = $user['nomor_kelas'];
                 $_SESSION['angkatan'] = $user['angkatan'];
                 
                 // Redirect ke dashboard
@@ -91,14 +93,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         name="password" 
                         placeholder="Masukkan password"
                         required
+                        autocomplete="off"
                     >
                     <button type="button" class="toggle-btn" onclick="togglePassword()">👁️</button>
                 </div>
-            </div>
-            
-            <div class="remember-me">
-                <input type="checkbox" id="remember" name="remember">
-                <label for="remember">Ingatkan saya</label>
             </div>
             
             <button type="submit" class="btn">Login Sekarang</button>

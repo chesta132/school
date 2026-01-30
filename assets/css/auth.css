@@ -205,25 +205,6 @@ body {
     color: #667eea;
 }
 
-.remember-me {
-    display: flex;
-    align-items: center;
-    margin-top: 12px;
-}
-
-.remember-me input[type="checkbox"] {
-    width: auto;
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-.remember-me label {
-    color: #6b7280;
-    font-size: 14px;
-    cursor: pointer;
-    margin: 0;
-}
-
 /* Responsive */
 @media (max-width: 480px) {
     .container {

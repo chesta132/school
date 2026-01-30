@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/koneksi.php';
+require_once '../config/kelas_config.php';
 
 // Cek kalo belum login, redirect ke login
 if (!isset($_SESSION['user_id'])) {
@@ -89,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
 }
 
 // Ambil data user terbaru
-$stmt = $conn->prepare("SELECT nama, email, kelas, jurusan, angkatan FROM users WHERE id = ?");
+$stmt = $conn->prepare("SELECT nama, email, kelas, jurusan, angkatan, nomor_kelas FROM users WHERE id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -201,7 +202,11 @@ $initials = getInitials($user['nama']);
                             <input 
                                 type="text" 
                                 id="kelas" 
-                                value="<?php echo htmlspecialchars($user['kelas'] ?: '-'); ?>"
+                                value="<?php echo buildKelas(
+                                    $user['kelas'],
+                                    $user['jurusan'],
+                                    $user['nomor_kelas']
+                                ); ?>"
                                 disabled
                             >
                         </div>
@@ -222,7 +227,7 @@ $initials = getInitials($user['nama']);
                         <input 
                             type="text" 
                             id="jurusan" 
-                            value="<?php echo htmlspecialchars($user['jurusan'] ?: '-'); ?>"
+                            value="<?php echo jurusanAliasToLong(htmlspecialchars($user['jurusan'] ?: '-')); ?>"
                             disabled
                         >
                     </div>

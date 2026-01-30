@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config/koneksi.php';
+require_once 'config/kelas_config.php';
 
 // Cek kalo belum login, redirect ke login
 if (!isset($_SESSION['user_id'])) {
@@ -52,7 +53,7 @@ $result = $stmt->get_result();
                     <div class="user-detail">
                         <?php 
                         if (!empty($_SESSION['kelas']) && !empty($_SESSION['jurusan'])) {
-                            echo htmlspecialchars($_SESSION['kelas'] . ' - ' . $_SESSION['jurusan']);
+                            echo htmlspecialchars($_SESSION['kelas']);
                         } else {
                             echo htmlspecialchars($_SESSION['email']);
                         }
@@ -101,14 +102,9 @@ $result = $stmt->get_result();
                                         <?php 
                                         $jurusan = strtolower($row['jurusan'] ?: '');
                                         $badge_class = 'badge-default';
-                                        
-                                        if ($jurusan === 'ipa') $badge_class = 'badge-ipa';
-                                        elseif ($jurusan === 'ips') $badge_class = 'badge-ips';
-                                        elseif ($jurusan === 'bahasa') $badge_class = 'badge-bahasa';
-                                        elseif ($jurusan === 'tkj') $badge_class = 'badge-tkj';
-                                        elseif ($jurusan === 'rpl') $badge_class = 'badge-rpl';
-                                        elseif ($jurusan === 'mm') $badge_class = 'badge-mm';
-                                        elseif ($jurusan === 'akl') $badge_class = 'badge-akl';
+                                        if ($jurusan != '') {
+                                            $badge_class = 'badge-'.$jurusan;
+                                        }
                                         ?>
                                         <span class="badge <?php echo $badge_class; ?>">
                                             <?php echo htmlspecialchars($row['jurusan'] ?: '-'); ?>

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/koneksi.php';
+require_once '../config/kelas_config.php';
 
 // Kalo udah login, redirect ke dashboard
 if (isset($_SESSION['user_id'])) {
@@ -16,9 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
-    $kelas = trim($_POST['kelas'] ?? '');
-    $jurusan = trim($_POST['jurusan'] ?? '');
+    $kelas_data = trim($_POST['kelas'] ?? '');
     $angkatan = trim($_POST['angkatan'] ?? '');
+    
+    // Parse kelas data (format: tingkat|nomor|jurusan)
+    $kelas_parts = explode('|', $kelas_data);
+    $tingkat = $kelas_parts[0] ?? '';
+    $nomor_kelas = $kelas_parts[1] ?? '';
+    $jurusan = $kelas_parts[2] ?? '';
     
     // Validasi
     if (empty($nama) || empty($email) || empty($password) || empty($confirm_password)) {
@@ -29,6 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Password minimal 6 karakter!';
     } elseif ($password !== $confirm_password) {
         $error = 'Password tidak cocok!';
+    } elseif (empty($kelas_data)) {
+        $error = 'Kelas harus dipilih!';
     } else {
         // Cek email udah ada apa belum
         $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
@@ -43,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
             // Insert ke database
-            $stmt = $conn->prepare("INSERT INTO users (nama, email, password, kelas, jurusan, angkatan) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssss", $nama, $email, $hashed_password, $kelas, $jurusan, $angkatan);
+            $stmt = $conn->prepare("INSERT INTO users (nama, email, password, kelas, nomor_kelas, jurusan, angkatan) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssss", $nama, $email, $hashed_password, $tingkat, $nomor_kelas, $jurusan, $angkatan);
             
             if ($stmt->execute()) {
                 $success = 'Registrasi berhasil! Silakan login.';
@@ -67,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="container">
         <div class="header">
-            <h1>Create Account</h1>
+            <h1>✨ Create Account</h1>
             <p>Daftar sekarang dan mulai perjalananmu</p>
         </div>
         
@@ -104,44 +112,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 >
             </div>
             
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="kelas">Kelas</label>
-                    <input 
-                        type="text" 
-                        id="kelas" 
-                        name="kelas" 
-                        placeholder="12 IPA 1"
-                        value="<?php echo htmlspecialchars($_POST['kelas'] ?? ''); ?>"
-                    >
-                </div>
-                
-                <div class="form-group">
-                    <label for="angkatan">Angkatan</label>
-                    <input 
-                        type="number" 
-                        id="angkatan" 
-                        name="angkatan" 
-                        placeholder="2024"
-                        min="2000"
-                        max="2100"
-                        value="<?php echo htmlspecialchars($_POST['angkatan'] ?? ''); ?>"
-                    >
-                </div>
+            <div class="form-group">
+                <label for="kelas">Kelas</label>
+                <select id="kelas" name="kelas" required>
+                    <option value="">-- Pilih Kelas --</option>
+                    <?php
+                    $all_kelas = getAllKelas();
+                    foreach ($all_kelas as $k) {
+                        $selected = (($_POST['kelas'] ?? '') === $k['value']) ? 'selected' : '';
+                        echo "<option value=\"{$k['value']}\" {$selected}>{$k['label']}</option>";
+                    }
+                    ?>
+                </select>
             </div>
             
             <div class="form-group">
-                <label for="jurusan">Jurusan</label>
-                <select id="jurusan" name="jurusan">
-                    <option value="">-- Pilih Jurusan --</option>
-                    <option value="IPA" <?php echo (($_POST['jurusan'] ?? '') === 'IPA') ? 'selected' : ''; ?>>IPA</option>
-                    <option value="IPS" <?php echo (($_POST['jurusan'] ?? '') === 'IPS') ? 'selected' : ''; ?>>IPS</option>
-                    <option value="Bahasa" <?php echo (($_POST['jurusan'] ?? '') === 'Bahasa') ? 'selected' : ''; ?>>Bahasa</option>
-                    <option value="TKJ" <?php echo (($_POST['jurusan'] ?? '') === 'TKJ') ? 'selected' : ''; ?>>TKJ (Teknik Komputer Jaringan)</option>
-                    <option value="RPL" <?php echo (($_POST['jurusan'] ?? '') === 'RPL') ? 'selected' : ''; ?>>RPL (Rekayasa Perangkat Lunak)</option>
-                    <option value="MM" <?php echo (($_POST['jurusan'] ?? '') === 'MM') ? 'selected' : ''; ?>>MM (Multimedia)</option>
-                    <option value="AKL" <?php echo (($_POST['jurusan'] ?? '') === 'AKL') ? 'selected' : ''; ?>>AKL (Akuntansi Keuangan Lembaga)</option>
-                </select>
+                <label for="angkatan">Angkatan</label>
+                <input 
+                    type="number" 
+                    id="angkatan" 
+                    name="angkatan" 
+                    placeholder="2024"
+                    min="2000"
+                    max="2100"
+                    value="<?php echo htmlspecialchars($_POST['angkatan'] ?? date('Y')); ?>"
+                >
             </div>
             
             <div class="form-group">
@@ -153,6 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         name="password" 
                         placeholder="Minimal 6 karakter"
                         required
+                        autocomplete="off"
                     >
                     <button type="button" class="toggle-btn" onclick="togglePassword('password')">👁️</button>
                 </div>
