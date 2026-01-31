@@ -8,4 +8,3 @@ session_destroy();
 // Redirect ke login
 header('Location: /login/');
 exit();
-?>

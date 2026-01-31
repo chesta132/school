@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once 'config/koneksi.php';
-require_once 'config/kelas_config.php';
+require_once 'lib.php';
 
 // Cek kalo belum login, redirect ke login
 if (!isset($_SESSION['user_id'])) {
@@ -30,6 +30,7 @@ $stmt = $conn->prepare($query);
 $stmt->bind_param("ii", $limit, $offset);
 $stmt->execute();
 $result = $stmt->get_result();
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -37,41 +38,101 @@ $result = $stmt->get_result();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Data Siswa</title>
+    <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/dashboard.css">
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <h1>📊 Dashboard Siswa</h1>
-                <p>Kelola dan lihat data siswa</p>
+<div class="dashboard-container">
+
+    <!-- ── Navbar ── -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="nav-brand-icon">
+                <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <div class="user-name"><?php echo htmlspecialchars($_SESSION['nama']); ?></div>
-                    <div class="user-detail">
-                        <?php 
+            <span class="nav-brand-text">Dashboard</span>
+        </div>
+
+        <div class="nav-right">
+            <div class="nav-user">
+                <div class="nav-user-info">
+                    <span class="nav-user-name"><?php echo htmlspecialchars($_SESSION['nama']); ?></span>
+                    <span class="nav-user-detail">
+                        <?php
                         if (!empty($_SESSION['kelas']) && !empty($_SESSION['jurusan'])) {
                             echo htmlspecialchars($_SESSION['kelas']);
                         } else {
                             echo htmlspecialchars($_SESSION['email']);
                         }
                         ?>
-                    </div>
+                    </span>
                 </div>
-                <a href="/profile" class="btn-logout" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Profile</a>
-                <a href="/logout" class="btn-logout">Logout</a>
+                <div class="nav-avatar"><?php echo getInitials($_SESSION['nama']); ?></div>
+            </div>
+
+            <a href="/profile" class="nav-pill">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="8" r="4"/></svg>
+                <span>Profile</span>
+            </a>
+            <a href="/logout" class="nav-pill nav-pill--danger">
+                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- ── Main ── -->
+    <main class="main-content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1>Daftar Siswa</h1>
+                <p>Kelola dan pantau data seluruh siswa</p>
             </div>
         </div>
 
-        <!-- Content -->
+        <!-- Stat Cards -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-card-top">
+                    <span class="stat-card-label">Total Siswa</span>
+                    <div class="stat-card-icon">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                </div>
+                <span class="stat-card-value"><?php echo number_format($total_data); ?></span>
+                <span class="stat-card-sub">siswa terdaftar</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-top">
+                    <span class="stat-card-label">Halaman</span>
+                    <div class="stat-card-icon">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    </div>
+                </div>
+                <span class="stat-card-value"><?php echo $page; ?><span style="font-size:var(--text-xl);color:var(--clr-text-tertiary);font-weight:var(--weight-medium);letter-spacing:0"> / <?php echo $total_pages ?: 1; ?></span></span>
+                <span class="stat-card-sub"><?php echo $limit; ?> data per halaman</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-top">
+                    <span class="stat-card-label">Ditampilkan</span>
+                    <div class="stat-card-icon">
+                        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </div>
+                </div>
+                <span class="stat-card-value"><?php echo $result->num_rows; ?></span>
+                <span class="stat-card-sub">dari <?php echo number_format($total_data); ?> siswa</span>
+            </div>
+        </div>
+
+        <!-- Table Card -->
         <div class="content-card">
             <div class="content-header">
-                <h2>Daftar Siswa</h2>
-                <div class="total-count">
-                    Total: <?php echo number_format($total_data); ?> Siswa
-                </div>
+                <h2>Semua Siswa</h2>
+                <span class="content-meta"><?php echo number_format($total_data); ?> total</span>
             </div>
 
             <?php if ($result->num_rows > 0): ?>
@@ -85,33 +146,28 @@ $result = $stmt->get_result();
                                 <th>Kelas</th>
                                 <th>Jurusan</th>
                                 <th>Angkatan</th>
-                                <th>Tanggal Daftar</th>
+                                <th>Daftar</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php 
+                            <?php
                             $no = $offset + 1;
-                            while ($row = $result->fetch_assoc()): 
+                            while ($row = $result->fetch_assoc()):
+                                $jurusan      = strtolower($row['jurusan'] ?: '');
+                                $badge_class  = $jurusan !== '' ? 'badge-' . $jurusan : 'badge-default';
                             ?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
-                                    <td><?php echo htmlspecialchars($row['nama']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['email']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['kelas'] ?: '-'); ?></td>
-                                    <td>
-                                        <?php 
-                                        $jurusan = strtolower($row['jurusan'] ?: '');
-                                        $badge_class = 'badge-default';
-                                        if ($jurusan != '') {
-                                            $badge_class = 'badge-'.$jurusan;
-                                        }
-                                        ?>
-                                        <span class="badge <?php echo $badge_class; ?>">
-                                            <?php echo htmlspecialchars($row['jurusan'] ?: '-'); ?>
+                                    <td class="td-ellipsis td-name"><?php echo htmlspecialchars($row['nama']); ?></td>
+                                    <td class="td-ellipsis td-email"><?php echo htmlspecialchars($row['email']); ?></td>
+                                    <td class="td-ellipsis"><?php echo htmlspecialchars($row['kelas'] ?: '—'); ?></td>
+                                    <td class="td-ellipsis">
+                                        <span class="badge <?php echo htmlspecialchars($badge_class); ?>">
+                                            <?php echo htmlspecialchars($row['jurusan'] ?: '—'); ?>
                                         </span>
                                     </td>
-                                    <td><?php echo htmlspecialchars($row['angkatan'] ?: '-'); ?></td>
-                                    <td><?php echo date('d/m/Y', strtotime($row['created_at'])); ?></td>
+                                    <td><?php echo htmlspecialchars($row['angkatan'] ?: '—'); ?></td>
+                                    <td class="td-date"><?php echo date('d M Y', strtotime($row['created_at'])); ?></td>
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
@@ -121,70 +177,66 @@ $result = $stmt->get_result();
                 <!-- Pagination -->
                 <?php if ($total_pages > 1): ?>
                     <div class="pagination">
-                        <!-- Previous Button -->
+                        <!-- Prev -->
                         <?php if ($page > 1): ?>
-                            <a href="?page=<?php echo $page - 1; ?>">← Prev</a>
+                            <a href="?page=<?php echo $page - 1; ?>" class="pag-prev">← Prev</a>
                         <?php else: ?>
-                            <span class="disabled">← Prev</span>
+                            <span class="disabled pag-prev">← Prev</span>
                         <?php endif; ?>
 
-                        <!-- Page Numbers -->
+                        <!-- Pages -->
                         <?php
                         $start_page = max(1, $page - 2);
-                        $end_page = min($total_pages, $page + 2);
+                        $end_page   = min($total_pages, $page + 2);
 
-                        // Kalo di awal, tampilin lebih banyak ke kanan
                         if ($page <= 3) {
                             $end_page = min($total_pages, 5);
                         }
-
-                        // Kalo di akhir, tampilin lebih banyak ke kiri
                         if ($page >= $total_pages - 2) {
                             $start_page = max(1, $total_pages - 4);
                         }
 
-                        // First page
                         if ($start_page > 1) {
                             echo '<a href="?page=1">1</a>';
-                            if ($start_page > 2) {
-                                echo '<span class="disabled">...</span>';
-                            }
+                            if ($start_page > 2) echo '<span class="disabled">…</span>';
                         }
 
-                        // Page numbers
                         for ($i = $start_page; $i <= $end_page; $i++) {
-                            if ($i == $page) {
+                            if ($i === $page) {
                                 echo '<span class="active">' . $i . '</span>';
                             } else {
                                 echo '<a href="?page=' . $i . '">' . $i . '</a>';
                             }
                         }
 
-                        // Last page
                         if ($end_page < $total_pages) {
-                            if ($end_page < $total_pages - 1) {
-                                echo '<span class="disabled">...</span>';
-                            }
+                            if ($end_page < $total_pages - 1) echo '<span class="disabled">…</span>';
                             echo '<a href="?page=' . $total_pages . '">' . $total_pages . '</a>';
                         }
                         ?>
 
-                        <!-- Next Button -->
+                        <!-- Next -->
                         <?php if ($page < $total_pages): ?>
-                            <a href="?page=<?php echo $page + 1; ?>">Next →</a>
+                            <a href="?page=<?php echo $page + 1; ?>" class="pag-next">Next →</a>
                         <?php else: ?>
-                            <span class="disabled">Next →</span>
+                            <span class="disabled pag-next">Next →</span>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
 
             <?php else: ?>
                 <div class="no-data">
-                    <p>😔 Belum ada data siswa</p>
+                    <div class="no-data-icon">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+                    <h3>Belum ada siswa</h3>
+                    <p>Data siswa akan muncul di sini setelah ada yang daftar</p>
                 </div>
             <?php endif; ?>
         </div>
-    </div>
+    </main>
+
+</div>
 </body>
 </html>
 <?php
