@@ -89,6 +89,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
     }
 }
 
+// Handle delete account
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_account'])) {
+    $confirm_password = $_POST['confirm_password_delete'] ?? '';
+
+    // Validasi password
+    if (empty($confirm_password)) {
+        $error = 'Password harus diisi untuk menghapus akun!';
+    } else {
+        // Cek password
+        $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+
+        if (!password_verify($confirm_password, $user['password'])) {
+            $error = 'Password salah! Akun tidak dapat dihapus.';
+        } else {
+            // Hapus foto profil kalo ada
+            $profile_pic = "../uploads/images/profile-picture/pfp-{$user_id}.jpg";
+            if (file_exists($profile_pic)) {
+                unlink($profile_pic);
+            }
+
+            // Hapus user dari database
+            $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->bind_param("i", $user_id);
+
+            if ($stmt->execute()) {
+                // Destroy session
+                session_destroy();
+                // Redirect ke halaman login
+                header('Location: /login');
+                exit();
+            } else {
+                $error = 'Terjadi kesalahan saat menghapus akun. Coba lagi nanti!';
+            }
+        }
+        $stmt->close();
+    }
+}
 // Ambil data user terbaru
 $stmt = $conn->prepare("SELECT nama, email, kelas, jurusan, angkatan, nomor_kelas FROM users WHERE id = ?");
 $stmt->bind_param("i", $user_id);
@@ -387,6 +428,37 @@ $kelas_full = buildKelas($user['kelas'], $user['jurusan'], $user['nomor_kelas'])
                 </div>
             </form>
 
+            <!-- Section: Delete Account -->
+            <div class="section-card section-card--danger">
+                <div class="section-header">
+                    <div class="section-header-icon">
+                        <svg viewBox="0 0 24 24">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            <line x1="10" y1="11" x2="10" y2="17" />
+                            <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Hapus Akun</h3>
+                        <p>Hapus akun secara permanen</p>
+                    </div>
+                </div>
+
+                <div class="info-box info-box--danger">
+                    <div class="info-box-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                    </div>
+                    <p>Setelah akun dihapus, tidak ada cara untuk mengembalikannya. Semua data kamu akan hilang permanen dari sistem.</p>
+                </div>
+
+                <button type="button" class="btn-submit btn-submit--danger" onclick="openDeleteModal()">Hapus Akun Saya</button>
+            </div>
+
         </main>
     </div>
 
@@ -394,6 +466,56 @@ $kelas_full = buildKelas($user['kelas'], $user['jurusan'], $user['nomor_kelas'])
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Konfirmasi Hapus Akun</h3>
+                <button type="button" class="modal-close" onclick="closeDeleteModal()">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-warning">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    <div>
+                        <p class="modal-warning-title">Peringatan: Tindakan Permanen</p>
+                        <p class="modal-warning-text">Akun kamu akan dihapus selamanya dan tidak bisa dikembalikan. Semua data akan hilang.</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="" id="deleteAccountForm">
+                    <div class="form-group">
+                        <label for="modal_password">Masukkan password kamu untuk konfirmasi</label>
+                        <div class="password-toggle">
+                            <input type="password" id="modal_password" name="confirm_password_delete" placeholder="Password" required autofocus>
+                            <button type="button" class="toggle-btn" onclick="togglePasswordField('modal_password')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z" />
+                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-modal btn-modal--secondary" onclick="closeDeleteModal()">Batal</button>
+                        <button type="submit" name="delete_account" class="btn-modal btn-modal--danger">Hapus Akun Saya</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="../lib.js"></script>
     <script>
         function uploadProfilePicture(input) {
@@ -460,6 +582,32 @@ $kelas_full = buildKelas($user['kelas'], $user['jurusan'], $user['nomor_kelas'])
                 btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"> <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/> <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/> </svg>';
             }
         }
+
+        function openDeleteModal() {
+            document.getElementById('deleteModal').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('modal_password').focus();
+            }, 100);
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            document.getElementById('deleteAccountForm').reset();
+        }
+
+        // Close modal on outside click
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDeleteModal();
+            }
+        });
     </script>
 </body>
 
