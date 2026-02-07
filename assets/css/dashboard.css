@@ -295,6 +295,113 @@ body {
   color: var(--clr-text-tertiary);
 }
 
+/* Editable Stat Card */
+.stat-card-editable {
+  position: relative;
+  cursor: default;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.stat-card-value-wrapper {
+  position: relative;
+}
+
+.stat-value-input {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: var(--clr-text-primary);
+  letter-spacing: -1px;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border-radius: var(--radius-sm);
+  appearance: none;
+  -moz-appearance: textfield;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.stat-value-input::-webkit-inner-spin-button,
+.stat-value-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Show input field on hover */
+.stat-card-editable:hover .stat-value-input,
+.stat-value-input:focus {
+  background: var(--clr-bg-input);
+  border: 1px solid var(--clr-border-default);
+  cursor: text;
+}
+
+.stat-value-input:focus {
+  border-color: var(--clr-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Apply Button on Stat Card */
+.stat-apply-btn {
+  position: absolute;
+  bottom: var(--space-sm);
+  right: var(--space-sm);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9);
+  transition: all var(--duration-fast) var(--ease-default);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-apply-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--clr-text-inverse);
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Show button on hover OR when value changed */
+.stat-apply-btn:not(:disabled) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.stat-card-editable.stat-hover .stat-apply-btn:disabled {
+  opacity: 1;
+  pointer-events: none;
+  transform: scale(1);
+  background: var(--clr-text-tertiary);
+}
+
+.stat-apply-btn:hover:not(:disabled) {
+  background: var(--clr-accent-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-apply-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.stat-apply-btn:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* ============================================
    Content Card (Table Wrapper)
    ============================================ */
@@ -453,6 +560,14 @@ td.td-date {
    Pagination
    ============================================ */
 
+/* ============================================
+   Pagination (Custom Editable)
+   ============================================ */
+
+.pagination-form {
+  position: relative;
+}
+
 .pagination {
   display: flex;
   align-items: center;
@@ -462,7 +577,7 @@ td.td-date {
   border-top: 1px solid var(--clr-border-default);
 }
 
-.pagination a,
+.pagination button,
 .pagination span {
   display: inline-flex;
   align-items: center;
@@ -482,22 +597,76 @@ td.td-date {
   border: 1px solid transparent;
   cursor: pointer;
   white-space: nowrap;
+  background: transparent;
 }
 
-.pagination a {
+.pagination .pag-num {
   color: var(--clr-text-secondary);
 }
 
-.pagination a:hover {
+.pagination .pag-num:hover {
   background: var(--clr-bg-input);
   color: var(--clr-text-primary);
   border-color: var(--clr-border-default);
 }
 
-.pagination span.active {
+/* Editable Input Wrapper */
+.pag-input-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+}
+
+.pag-input-wrapper.active {
   background: var(--clr-accent);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--clr-accent);
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.pag-input {
+  width: 34px;
+  height: 32px;
+  text-align: center;
+  font-family: var(--font-base);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   color: var(--clr-text-inverse);
-  border-color: var(--clr-accent);
+  background: transparent;
+  border: none;
+  outline: none;
+  appearance: none;
+  -moz-appearance: textfield;
+  cursor: default;
+  padding: 0;
+}
+
+.pag-input::-webkit-inner-spin-button,
+.pag-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Show input field on hover */
+.pag-input-wrapper:hover {
+  background: var(--clr-bg-input);
+  border-color: var(--clr-border-default);
+}
+
+.pag-input-wrapper:hover .pag-input {
+  color: var(--clr-text-primary);
+  cursor: text;
+  background: var(--clr-bg-input);
+  border-radius: var(--radius-sm);
+}
+
+.pag-input:focus {
+  color: var(--clr-text-primary);
+  background: var(--clr-bg-input);
+  cursor: text;
 }
 
 .pagination span.disabled {
@@ -516,6 +685,64 @@ td.td-date {
 .pagination .pag-prev:not(.disabled):hover,
 .pagination .pag-next:not(.disabled):hover {
   color: var(--clr-text-primary);
+  background: var(--clr-bg-input);
+  border-color: var(--clr-border-default);
+}
+
+/* Apply Button (Hidden by default) */
+.pag-apply-btn {
+  position: absolute;
+  bottom: var(--space-md);
+  right: var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px var(--space-sm);
+  font-family: var(--font-base);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semi);
+  color: var(--clr-text-inverse);
+  background: var(--clr-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: all var(--duration-fast) var(--ease-default);
+  box-shadow: var(--shadow-sm);
+}
+
+.pag-apply-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Show button on card hover OR when value changed */
+.pagination-form.card-hover .pag-apply-btn:not(:disabled),
+.pag-apply-btn:not(:disabled) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.pag-apply-btn:hover:not(:disabled) {
+  background: var(--clr-accent-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.pag-apply-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.pag-apply-btn:disabled {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ============================================
