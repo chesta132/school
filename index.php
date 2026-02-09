@@ -3,8 +3,9 @@ session_start();
 require_once 'config/koneksi.php';
 require_once 'lib.php';
 
+$user_id = $_SESSION['user_id'];
 // Cek kalo belum login, redirect ke login
-if (!isset($_SESSION['user_id'])) {
+if (!isset($user_id)) {
     header('Location: /login/');
     exit();
 }
@@ -17,6 +18,11 @@ $limit = max($min_limit, min($max_limit, $limit));
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $page = $page < 1 ? 1 : $page;
 $offset = ($page - 1) * $limit;
+
+// Cek apakah ada foto profil
+$profile_pic_path = "uploads/images/profile-picture/pfp-{$user_id}.jpg";
+$has_profile_pic = file_exists($profile_pic_path);
+$initials = getInitials($_SESSION['nama']);
 
 // Hitung total data
 $count_query = "SELECT COUNT(*) as total FROM users";
@@ -74,7 +80,13 @@ $result = $stmt->get_result();
                             ?>
                         </span>
                     </div>
-                    <div class="nav-avatar"><?php echo getInitials($_SESSION['nama']); ?></div>
+                    <div class="nav-avatar">
+                        <?php if ($has_profile_pic): ?>
+                            <img src="/<?php echo $profile_pic_path; ?>?v=<?php echo time(); ?>" alt="<?php echo $initials ?>">
+                        <?php else: ?>
+                            <?php echo $initials; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <a href="/profile" class="nav-pill">

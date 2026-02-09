@@ -181,7 +181,7 @@ $kelas_full = buildKelas($user['kelas'], $user['jurusan'], $user['nomor_kelas'])
                     </div>
                     <div class="nav-avatar">
                         <?php if ($has_profile_pic): ?>
-                            <img src="/<?php echo $profile_pic_path; ?>?v=<?php echo time(); ?>" alt="">
+                            <img src="/<?php echo $profile_pic_path; ?>?v=<?php echo time(); ?>" alt="<?php echo $initials ?>">
                         <?php else: ?>
                             <?php echo $initials; ?>
                         <?php endif; ?>
@@ -556,7 +556,7 @@ $kelas_full = buildKelas($user['kelas'], $user['jurusan'], $user['nomor_kelas'])
                             // Update juga bagian avatar kecil di Navbar agar sinkron
                             const navAvatar = document.querySelector('.nav-avatar');
                             if (navAvatar) {
-                                navAvatar.innerHTML = `<img src="${imagePath}?v=${timestamp}" alt="">`;
+                                navAvatar.innerHTML = `<img src="${imagePath}?v=${timestamp}" alt="<?php echo $initials ?>">`;
                             }
                         } else {
                             showMessage('Error: ' + data.message, false);
