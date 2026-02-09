@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404: Page Not Found</title>
+    <link rel="stylesheet" href="/assets/css/not-found.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="error-wrapper">
+        <h1 class="error-code">404</h1>
+        <div class="divider"></div>
+        <div class="error-message">
+          <h2>This page could not be found.</h2>
+        </div>
+      </div>
+
+      <a href="/" class="footer">
+        <div class="nav-brand-icon">
+          <svg viewBox="0 0 24 24">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+        </div>
+        <p>Back to Home</p>
+      </a>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("Error 404: Halaman tidak ditemukan.");
+
+        // Efek interaksi kecil: logo bergetar dikit pas di hover
+        const logo = document.querySelector(".nav-brand-icon");
+
+        logo.addEventListener("mouseenter", () => {
+          logo.style.transform = "scale(1.1)";
+        });
+
+        logo.addEventListener("mouseleave", () => {
+          logo.style.transform = "scale(1)";
+        });
+      });
+    </script>
+  </body>
+</html>
