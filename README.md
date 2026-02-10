@@ -42,10 +42,10 @@ docker-compose up -d
 
 4. **Login default:**
 - Username: `admin`
-- Password: `admin123`
+- Password: `password`
 
 5. **Untuk Register user baru, gunakan Secret Key:**
-- Secret Key: `chardymart_secret_2025_xyz`
+- Secret Key: `secret`
 
 ## 📝 Default Data
 
@@ -61,7 +61,7 @@ Environment variables sudah di-set di `docker-compose.yml`:
 - `DB_NAME=chardymart_pos`
 - `DB_USER=root`
 - `DB_PASSWORD=secret123`
-- `SECRET_KEY=chardymart_secret_2025_xyz`
+- `SECRET_KEY=secret`
 
 Untuk mengubah secret key, edit di `docker-compose.yml` dan restart container.
 

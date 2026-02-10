@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS `transaction_items` (
 -- Insert Sample Data
 -- --------------------------------------------------------
 
--- Insert default user (password: admin123)
+-- Insert default user (password: password)
 INSERT INTO `users` (`username`, `email`, `password`) VALUES
 ('admin', 'admin@chardymart.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
 

@@ -13,7 +13,7 @@ services:
       - DB_NAME=chardymart_pos
       - DB_USER=root
       - DB_PASSWORD=secret123
-      - SECRET_KEY=chardymart_secret_2025_xyz
+      - SECRET_KEY=secret
 
   db:
     image: mysql:5.7

@@ -2,13 +2,13 @@
 // Config.php - Configuration file for ChardyMart POS
 
 // Database Configuration from Environment Variables
-define('DB_HOST', getenv('DB_HOST') ?: 'db');
+define('DB_HOST', getenv('DB_HOST') ?: '10.10.6.1');
 define('DB_NAME', getenv('DB_NAME') ?: 'chardymart_pos');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASSWORD', getenv('DB_PASSWORD') ?: 'secret123');
+define('DB_USER', getenv('DB_USER') ?: 'admin');
+define('DB_PASSWORD', getenv('DB_PASSWORD') ?: 'admin123');
 
 // Secret Key for Registration
-define('SECRET_KEY', getenv('SECRET_KEY') ?: 'chardymart_secret_2025_xyz');
+define('SECRET_KEY', getenv('SECRET_KEY') ?: 'secret');
 
 // App Configuration
 define('APP_NAME', 'ChardyMart POS');
