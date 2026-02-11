@@ -37,14 +37,23 @@ redirectIfLoggedIn();
                 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
+                    <div style="position: relative;">
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" onclick="togglePassword('password')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px 8px;">
+                            <i class="fas fa-eye" id="password_icon"></i>
+                        </button>
+                    </div>
                     <small>Minimal 6 karakter</small>
                 </div>
                 
                 <div class="form-group">
                     <label for="confirm_password">Konfirmasi Password</label>
-                    <input type="password" id="confirm_password" name="confirm_password" required>
-                </div>
+                    <div style="position: relative;">
+                        <input type="password" id="confirm_password" name="confirm_password" required>
+                        <button type="button" onclick="togglePassword('confirm_password')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px 8px;">
+                            <i class="fas fa-eye" id="confirm_password_icon"></i>
+                        </button>
+                    </div>
                 
                 <div class="form-group">
                     <label for="secret_key">Secret Key</label>
@@ -70,6 +79,22 @@ redirectIfLoggedIn();
     <script src="/assets/js/notification.js"></script>
     <script>
         const registerForm = document.getElementById('registerForm');
+        
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '_icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
         
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();

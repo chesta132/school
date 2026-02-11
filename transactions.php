@@ -171,15 +171,15 @@ async function viewDetails(transactionId) {
                         <tbody>${items}</tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="4" style="text-align: right;"><strong>Total:</strong></td>
+                                <td colspan="4" style="text-align: right;"><strong>Total:&nbsp;</strong></td>
                                 <td><strong>${formatCurrency(data.transaction.total_amount)}</strong></td>
                             </tr>
                             <tr>
-                                <td colspan="4" style="text-align: right;"><strong>Diskon:</strong></td>
+                                <td colspan="4" style="text-align: right;"><strong>Diskon:&nbsp;</strong></td>
                                 <td style="color: var(--error);"><strong>${formatCurrency(data.transaction.total_discount)}</strong></td>
                             </tr>
                             <tr>
-                                <td colspan="4" style="text-align: right;"><strong>Grand Total:</strong></td>
+                                <td colspan="4" style="text-align: right;"><strong>Grand Total:&nbsp;</strong></td>
                                 <td style="color: var(--success);"><strong>${formatCurrency(data.transaction.grand_total)}</strong></td>
                             </tr>
                         </tfoot>

@@ -20,7 +20,7 @@ $confirm_password = $data['confirm_password'] ?? '';
 $secret_key = $data['secret_key'] ?? '';
 
 // Validation
-if (empty($username) || empty($email) || empty($password) || empty($confirm_password) || empty($secret_key)) {
+if (empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
     jsonResponse(['success' => false, 'message' => 'Semua field harus diisi']);
 }
 

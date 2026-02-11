@@ -50,18 +50,22 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                         <i class="fas fa-receipt"></i>
                         <span>Transaksi</span>
                     </a>
+                    <a href="/users" class="nav-link <?php echo $current_page == 'users' ? 'active' : ''; ?>">
+                        <i class="fas fa-users"></i>
+                        <span>Pengguna Terdaftar</span>
+                    </a>
                 </div>
                 <div class="nav-user">
-                    <span class="user-name"><?php echo htmlspecialchars($current_user['username']); ?></span>
+                    <a href="/profile" class="nav-link <?php echo $current_page == 'profile' ? 'active' : ''; ?>" style="padding: 6px 12px;">
+                        <i class="fas fa-user"></i>
+                        <span class="user-name"><?php echo htmlspecialchars($current_user['username']); ?></span>
+                    </a>
                     <button onclick="handleLogout()" class="btn-logout" title="Logout">
                         <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
             </div>
         </nav>
-
-        <!-- Mobile Overlay -->
-        <!-- <div class="mobile-overlay" id="mobileOverlay"></div> -->
 
         <!-- Mobile Sidebar -->
         <aside class="mobile-sidebar" id="mobileSidebar">
@@ -101,6 +105,14 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                 <a href="/transactions" class="mobile-nav-link <?php echo $current_page == 'transactions' ? 'active' : ''; ?>">
                     <i class="fas fa-receipt"></i>
                     <span>Transaksi</span>
+                </a>
+                <a href="/profile" class="mobile-nav-link <?php echo $current_page == 'profile' ? 'active' : ''; ?>">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="/users" class="mobile-nav-link <?php echo $current_page == 'users' ? 'active' : ''; ?>">
+                    <i class="fas fa-users"></i>
+                    <span>Pengguna Terdaftar</span>
                 </a>
             </nav>
 
