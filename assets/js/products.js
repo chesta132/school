@@ -42,7 +42,7 @@ function populateCategoryFilter() {
         const option = document.createElement('option');
         option.value = cat.id;
         option.textContent = cat.name;
-        select.appendChild(option);
+        select?.appendChild(option);
     });
 }
 
