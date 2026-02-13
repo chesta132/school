@@ -101,7 +101,7 @@ require_once __DIR__ . '/includes/header.php';
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($products as $p): ?>
-                                        <tr data-product-id="<?php echo $p['id']; ?>" 
+                                        <tr data-product-id="<?php echo $p['id']; ?>"
                                             data-sku="<?php echo htmlspecialchars($p['sku']); ?>"
                                             data-name="<?php echo htmlspecialchars($p['name']); ?>"
                                             data-price="<?php echo $p['price']; ?>"
@@ -117,21 +117,21 @@ require_once __DIR__ . '/includes/header.php';
                                             </td>
                                             <td><?php echo formatCurrency($p['price']); ?></td>
                                             <td>
-                                                <span class="badge-stock <?php 
-                                                    if ($p['stock'] <= 0) {
-                                                        echo 'stock-out';
-                                                    } elseif ($p['stock'] < 10) {
-                                                        echo 'stock-low';
-                                                    } else {
-                                                        echo 'stock-normal';
-                                                    }
-                                                ?>">
+                                                <span class="badge-stock <?php
+                                                                            if ($p['stock'] <= 0) {
+                                                                                echo 'stock-out';
+                                                                            } elseif ($p['stock'] < 10) {
+                                                                                echo 'stock-low';
+                                                                            } else {
+                                                                                echo 'stock-normal';
+                                                                            }
+                                                                            ?>">
                                                     <?php echo $p['stock']; ?>
                                                 </span>
                                             </td>
                                             <td>
-                                                <button onclick="addToCartFromList('<?php echo htmlspecialchars($p['sku']); ?>')" 
-                                                        class="btn btn-primary btn-sm">
+                                                <button onclick="addToCartFromList('<?php echo htmlspecialchars($p['sku']); ?>')"
+                                                    class="btn btn-primary btn-sm">
                                                     <i class="fas fa-plus"></i>
                                                 </button>
                                             </td>
@@ -142,7 +142,7 @@ require_once __DIR__ . '/includes/header.php';
                         </table>
                     </div>
                 </div>
-                
+
                 <?php
                 // Render pagination
                 $hidden_inputs = ['limit' => $pagination['limit']];
@@ -177,7 +177,16 @@ require_once __DIR__ . '/includes/header.php';
                         <tbody id="cartItems">
                             <!-- TODO: -->
                             <tr>
-                                <td colspan="5" class="text-center">Keranjang kosong</td>
+                                <td colspan="5" class="text-center">
+                                    <div class="empty-cart">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="9" cy="21" r="1"></circle>
+                                            <circle cx="20" cy="21" r="1"></circle>
+                                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                        </svg>
+                                        <p>Keranjang kosong</p>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -253,21 +262,25 @@ require_once __DIR__ . '/includes/header.php';
 <?php echo renderPaginationScript('.card'); ?>
 
 <script>
-function setPayment(amount) {
-    document.getElementById('paymentInput').value = amount;
-    updateChange();
-}
+    function setPayment(amount) {
+        document.getElementById('paymentInput').value = amount;
+        updateChange();
+    }
 
-function formatCurrency(amount) {
-    return 'Rp ' + parseFloat(amount || 0).toLocaleString('id-ID');
-}
+    function formatCurrency(amount) {
+        return 'Rp ' + parseFloat(amount || 0).toLocaleString('id-ID');
+    }
 
-function addToCartFromList(sku) {
-    document.getElementById('skuInput').value = sku;
-    // Trigger the existing cashier.js SKU input handler
-    const event = new KeyboardEvent('keypress', { key: 'Enter', keyCode: 13, which: 13 });
-    document.getElementById('skuInput').dispatchEvent(event);
-}
+    function addToCartFromList(sku) {
+        document.getElementById('skuInput').value = sku;
+        // Trigger the existing cashier.js SKU input handler
+        const event = new KeyboardEvent('keypress', {
+            key: 'Enter',
+            keyCode: 13,
+            which: 13
+        });
+        document.getElementById('skuInput').dispatchEvent(event);
+    }
 </script>
 
 <?php
