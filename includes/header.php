@@ -130,6 +130,12 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                 var sidebar = document.getElementById('mobileSidebar');
                 var closeBtn = document.getElementById('sidebarClose');
 
+                document.addEventListener('click', (e) => {
+                    if (!toggle.contains(e.target) && !sidebar.contains(e.target) && sidebar.classList.contains('open')) {
+                        closeSidebar();
+                    }
+                })
+
                 function openSidebar() {
                     sidebar.classList.add('open');
                     document.body.style.overflow = 'hidden';
