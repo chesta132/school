@@ -151,6 +151,9 @@ body {
 /* Page Header */
 .page-header {
     margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .page-header h1 {
@@ -592,6 +595,11 @@ code {
     flex-wrap: wrap;
 }
 
+.filter-category {
+    display: flex;
+    gap: 12px;
+}
+
 .search-box {
     flex: 1;
     min-width: 250px;
@@ -898,6 +906,8 @@ input[type=number] {
     .dashboard-grid { grid-template-columns: 1fr; gap: 16px; }
     .auth-card { padding: 24px; }
     .search-filter-bar { flex-direction: column; gap: 8px; }
+    .filter-category { justify-content: space-between; }
+    .filter-category .btn { width: 50%; }
     .search-box { min-width: 100%; }
     .cashier-container { grid-template-columns: 1fr !important; height: auto !important; gap: 16px; }
     .transactions-stats { grid-template-columns: 1fr !important; }

@@ -175,7 +175,6 @@ require_once __DIR__ . '/includes/header.php';
                             </tr>
                         </thead>
                         <tbody id="cartItems">
-                            <!-- TODO: -->
                             <tr>
                                 <td colspan="5" class="text-center">
                                     <div class="empty-cart">

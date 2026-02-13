@@ -84,15 +84,17 @@ require_once __DIR__ . '/includes/header.php';
                     <i class="fas fa-search"></i>
                     <input type="text" name="search" placeholder="Cari produk..." value="<?php echo htmlspecialchars($search); ?>">
                 </div>
-                <select name="category" class="form-control" style="width: 200px;">
-                    <option value="">Semua Kategori</option>
-                    <?php foreach ($categories as $cat): ?>
-                        <option value="<?php echo $cat['id']; ?>" <?php echo $category_filter == $cat['id'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($cat['name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <button type="submit" class="btn btn-primary">Filter</button>
+                <div class="filter-category">
+                    <select name="category" class="form-control" style="width: 200px;">
+                        <option value="">Semua Kategori</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo $cat['id']; ?>" <?php echo $category_filter == $cat['id'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($cat['name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
             </form>
             
             <div class="table-responsive">
