@@ -3,8 +3,42 @@ $page_title = 'User Management';
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/pagination_logic.php';
+require_once __DIR__ . '/includes/pagination.php';
 
-requireAuth(); // All authenticated users can access
+requireAuth();
+
+// Get pagination params
+$pagination = getPaginationParams(10, 5, 100);
+
+// Search filter
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+// Build query with search
+$where_clause = "";
+$params = [];
+
+if (!empty($search)) {
+    $where_clause = "WHERE username LIKE ? OR email LIKE ? OR id LIKE ?";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+}
+
+// Count total users
+$count_query = "SELECT COUNT(*) as total FROM users $where_clause";
+$stmt = $pdo->prepare($count_query);
+$stmt->execute($params);
+$total_data = $stmt->fetch()['total'];
+$total_pages = calculateTotalPages($total_data, $pagination['limit']);
+
+// Get users with pagination
+$query = "SELECT * FROM users $where_clause ORDER BY created_at DESC LIMIT ? OFFSET ?";
+$params[] = $pagination['limit'];
+$params[] = $pagination['offset'];
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$users = $stmt->fetchAll();
 
 require_once __DIR__ . '/includes/header.php';
 ?>
@@ -19,12 +53,14 @@ require_once __DIR__ . '/includes/header.php';
     
     <div class="card">
         <div class="card-body">
-            <div class="search-filter-bar">
+            <form method="GET" action="" class="search-filter-bar">
+                <input type="hidden" name="limit" value="<?php echo $pagination['limit']; ?>">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Cari user..." onkeyup="searchUsers()">
+                    <input type="text" name="search" placeholder="Cari user..." value="<?php echo htmlspecialchars($search); ?>">
                 </div>
-            </div>
+                <button type="submit" class="btn btn-primary">Cari</button>
+            </form>
             
             <div class="table-responsive">
                 <table class="table" id="usersTable">
@@ -38,87 +74,50 @@ require_once __DIR__ . '/includes/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td colspan="6" class="text-center">Loading...</td>
-                        </tr>
+                        <?php if (empty($users)): ?>
+                            <tr>
+                                <td colspan="5" class="text-center">Tidak ada user</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($users as $user): ?>
+                                <tr>
+                                    <td><code><?php echo $user['id']; ?></code></td>
+                                    <td style="white-space: nowrap;"><?php echo htmlspecialchars($user['username']); ?></td>
+                                    <td style="white-space: nowrap;"><?php echo htmlspecialchars($user['email']); ?></td>
+                                    <td style="white-space: nowrap;"><?php echo formatDateTime($user['created_at']); ?></td>
+                                    <td style="white-space: nowrap;"><?php echo formatDateTime($user['updated_at']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
+
+            <?php
+            // Render pagination
+            $hidden_inputs = ['limit' => $pagination['limit']];
+            if (!empty($search)) {
+                $hidden_inputs['search'] = $search;
+            }
+            echo renderPagination($pagination['page'], $total_pages, $hidden_inputs);
+            ?>
         </div>
     </div>
 </div>
 
-<script src="/assets/js/modal.js"></script>
-<script src="/assets/js/notification.js"></script>
+<?php echo renderPaginationScript(); ?>
+
 <script>
-    let allUsers = [];
-    
-    // Load all users
-    async function loadUsers() {
-        try {
-            const response = await fetch('/api/get-users.php');
-            const data = await response.json();
-            
-            if (data.success) {
-                allUsers = data.users;
-                displayUsers(allUsers);
-            }
-        } catch (error) {
-            console.error('Error loading users:', error);
-            Notification.show({ message: 'Gagal memuat data user', type: 'error' });
-        }
-    }
-    
-    // Display users in table
-    function displayUsers(users) {
-        const tbody = document.querySelector('#usersTable tbody');
-        
-        if (users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Tidak ada user</td></tr>';
-            return;
-        }
-        
-        tbody.innerHTML = users.map(user => `
-            <tr>
-                <td><code>${user.id}</code></td>
-                <td style="white-space: nowrap;">${user.username}</td>
-                <td style="white-space: nowrap;">${user.email}</td>
-                <td style="white-space: nowrap;">${formatDateTime(user.created_at)}</td>
-                <td style="white-space: nowrap;">${formatDateTime(user.updated_at)}</td>
-            </tr>
-        `).join('');
-    }
-    
-    // Search users
-    function searchUsers() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        
-        let filtered = allUsers.filter(user => {
-            const matchesSearch = 
-                user.username.toLowerCase().includes(query) ||
-                user.email.toLowerCase().includes(query) ||
-                user.id.toString().includes(query);
-            
-            
-            return matchesSearch;
-        });
-        
-        displayUsers(filtered);
-    }
-    
-    function formatDateTime(datetime) {
-        const date = new Date(datetime);
-        return date.toLocaleString('id-ID', { 
-            day: '2-digit', 
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-    }
-    
-    // Load users on page load
-    loadUsers();
+function formatDateTime(datetime) {
+    const date = new Date(datetime);
+    return date.toLocaleString('id-ID', { 
+        day: '2-digit', 
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+}
 </script>
 
 <?php

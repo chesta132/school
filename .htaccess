@@ -1,19 +1,16 @@
 RewriteEngine On
 RewriteBase /
 
-# Redirect to HTTPS (optional, uncomment if needed)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
 # Remove trailing slash (only for non-directories)
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.+)/$ /$1 [L,R=301]
+RewriteCond %{REQUEST_URI} (.+)/$
+RewriteRule ^ %1 [L,R=301]
 
 # Handle clean URLs
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^(.*)$ $1.php [L,QSA]
+RewriteRule ^([^/]+)$ $1.php [L,QSA]
 
 # Custom 404 page
 ErrorDocument 404 /404.php

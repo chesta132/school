@@ -228,7 +228,7 @@ require_once __DIR__ . '/includes/header.php';
                 <td><code>${p.sku}</code></td>
                 <td>${p.name}</td>
                 <td><span class="badge badge-info">${p.category_name}</span></td>
-                <td><span class="badge ${getStockBadgeClass(p.stock)}">${p.stock}</span></td>
+                <td><span class="badge-stock ${getStockBadgeClass(p.stock)}">${p.stock}</span></td>
             </tr>
         `).join('');
     }
@@ -248,9 +248,9 @@ require_once __DIR__ . '/includes/header.php';
     }
     
     function getStockBadgeClass(stock) {
-        if (stock < 10) return 'badge-danger';
-        if (stock < 30) return 'badge-warning';
-        return 'badge-success';
+        if (stock <= 0) return 'stock-out';
+        if (stock < 10) return 'stock-low';
+        return 'stock-normal';
     }
     
     // Load dashboard data on page load

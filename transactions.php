@@ -3,6 +3,8 @@ $page_title = 'Transaksi';
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/pagination_logic.php';
+require_once __DIR__ . '/includes/pagination.php';
 
 requireAuth();
 
@@ -10,15 +12,34 @@ requireAuth();
 $date_from = $_GET['from'] ?? date('Y-m-d');
 $date_to = $_GET['to'] ?? date('Y-m-d');
 
-// Get transactions
+// Validate: to date should not be before from date
+if (strtotime($date_to) < strtotime($date_from)) {
+    $date_to = $date_from;
+}
+
+// Get pagination params
+$pagination = getPaginationParams(10, 5, 100);
+
+// Count total transactions for the date range
+$count_stmt = $pdo->prepare("
+    SELECT COUNT(*) as total
+    FROM transactions t
+    WHERE DATE(t.created_at) BETWEEN ? AND ?
+");
+$count_stmt->execute([$date_from, $date_to]);
+$total_data = $count_stmt->fetch()['total'];
+$total_pages = calculateTotalPages($total_data, $pagination['limit']);
+
+// Get transactions with pagination
 $stmt = $pdo->prepare("
     SELECT t.*, u.username 
     FROM transactions t 
     JOIN users u ON t.user_id = u.id 
     WHERE DATE(t.created_at) BETWEEN ? AND ?
     ORDER BY t.created_at DESC
+    LIMIT ? OFFSET ?
 ");
-$stmt->execute([$date_from, $date_to]);
+$stmt->execute([$date_from, $date_to, $pagination['limit'], $pagination['offset']]);
 $transactions = $stmt->fetchAll();
 
 // Get summary
@@ -44,12 +65,13 @@ require_once __DIR__ . '/includes/header.php';
     
     <div class="card">
         <div class="card-body">
-            <form method="GET" class="search-filter-bar">
+            <form method="GET" class="search-filter-bar" id="dateFilterForm">
+                <input type="hidden" name="limit" value="<?php echo $pagination['limit']; ?>">
                 <div class="form-group" style="margin: 0;">
-                    <input type="date" name="from" value="<?php echo $date_from; ?>" class="form-control">
+                    <input type="date" name="from" id="dateFrom" value="<?php echo $date_from; ?>" class="form-control">
                 </div>
                 <div class="form-group" style="margin: 0;">
-                    <input type="date" name="to" value="<?php echo $date_to; ?>" class="form-control">
+                    <input type="date" name="to" id="dateTo" value="<?php echo $date_to; ?>" class="form-control">
                 </div>
                 <button type="submit" class="btn btn-primary">Filter</button>
             </form>
@@ -91,7 +113,7 @@ require_once __DIR__ . '/includes/header.php';
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table">
+                <table class="table" id="transactionsTable">
                     <thead>
                         <tr>
                             <th>Kode Transaksi</th>
@@ -129,11 +151,60 @@ require_once __DIR__ . '/includes/header.php';
                     </tbody>
                 </table>
             </div>
+
+            <?php
+            // Render pagination
+            $hidden_inputs = [
+                'limit' => $pagination['limit'],
+                'from' => $date_from,
+                'to' => $date_to
+            ];
+            echo renderPagination($pagination['page'], $total_pages, $hidden_inputs);
+            ?>
         </div>
     </div>
 </div>
 
+<?php echo renderPaginationScript('.card:last-child'); ?>
+
 <script>
+// Date validation
+document.addEventListener('DOMContentLoaded', () => {
+    const dateForm = document.getElementById('dateFilterForm');
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo = document.getElementById('dateTo');
+    
+    if (dateForm && dateFrom && dateTo) {
+        dateForm.addEventListener('submit', (e) => {
+            if (dateTo.value && dateFrom.value && dateTo.value < dateFrom.value) {
+                e.preventDefault();
+                Notification.show({ 
+                    message: 'Tanggal akhir tidak boleh lebih awal dari tanggal awal', 
+                    type: 'error' 
+                });
+                dateTo.value = dateFrom.value;
+            }
+        });
+        
+        // Auto-adjust on change
+        dateFrom.addEventListener('change', () => {
+            if (dateTo.value && dateTo.value < dateFrom.value) {
+                dateTo.value = dateFrom.value;
+            }
+        });
+        
+        dateTo.addEventListener('change', () => {
+            if (dateFrom.value && dateTo.value < dateFrom.value) {
+                dateTo.value = dateFrom.value;
+                Notification.show({ 
+                    message: 'Tanggal akhir disesuaikan ke tanggal awal', 
+                    type: 'warning' 
+                });
+            }
+        });
+    }
+});
+
 async function viewDetails(transactionId) {
     try {
         const response = await fetch(`/api/get-transaction-details.php?id=${transactionId}`);
@@ -190,6 +261,25 @@ async function viewDetails(transactionId) {
     } catch (error) {
         Notification.show({ message: 'Gagal memuat detail', type: 'error' });
     }
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
+    }).format(amount);
+}
+
+function formatDateTime(datetime) {
+    const date = new Date(datetime);
+    return date.toLocaleString('id-ID', { 
+        day: '2-digit', 
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
 }
 </script>
 

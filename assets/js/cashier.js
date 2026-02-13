@@ -1,17 +1,31 @@
 // Cashier Page JavaScript
 
 let cart = [];
+let allProducts = [];
+let cashierProductsPagination;
 
 // Load cart from localStorage
 document.addEventListener('DOMContentLoaded', () => {
     loadCart();
     setupEventListeners();
+    loadProducts();
+    
+    // Initialize product list pagination
+    cashierProductsPagination = new Pagination({
+        containerId: 'cashierProductsPagination',
+        itemsPerPage: 5,
+        perPageOptions: [5, 10, 25, 50],
+        onPageChange: (items) => {
+            displayProductsFromPagination(items);
+        }
+    });
 });
 
 // Setup event listeners
 function setupEventListeners() {
     const skuInput = document.getElementById('skuInput');
     const paymentInput = document.getElementById('paymentInput');
+    const productSearch = document.getElementById('productSearch');
     
     // SKU input handler
     skuInput.addEventListener('keypress', async (e) => {
@@ -27,6 +41,11 @@ function setupEventListeners() {
     
     // Payment input handler
     paymentInput.addEventListener('input', updateChange);
+    
+    // Product search handler
+    productSearch.addEventListener('input', (e) => {
+        filterProducts(e.target.value);
+    });
 }
 
 // Load cart from localStorage
@@ -61,9 +80,22 @@ async function addProductBySKU(sku) {
 
 // Add product to cart
 function addToCart(product) {
+    const stock = parseInt(product.stock);
+    
+    // Check if product is out of stock
+    if (stock <= 0) {
+        Notification.show({ message: 'Produk habis', type: 'error' });
+        return;
+    }
+    
     const existingIndex = cart.findIndex(item => item.id === product.id);
     
     if (existingIndex >= 0) {
+        // Check if adding one more would exceed stock
+        if (cart[existingIndex].qty >= stock) {
+            Notification.show({ message: 'Stok tidak mencukupi', type: 'warning' });
+            return;
+        }
         cart[existingIndex].qty += 1;
     } else {
         cart.push({
@@ -73,7 +105,7 @@ function addToCart(product) {
             price: parseFloat(product.price),
             discount: parseFloat(product.discount),
             qty: 1,
-            stock: parseInt(product.stock)
+            stock: stock
         });
     }
     
@@ -108,7 +140,13 @@ function updateCartDisplay() {
                         <button onclick="decreaseQty(${index})" class="action-btn" style="width: 28px; height: 28px;">
                             <i class="fas fa-minus"></i>
                         </button>
-                        <span style="min-width: 30px; text-align: center; font-weight: 600;">${item.qty}</span>
+                        <input type="number" 
+                               value="${item.qty}" 
+                               onchange="updateQtyFromInput(${index}, this.value)"
+                               min="1" 
+                               max="${item.stock}"
+                               class="inputQty"
+                               style="width: 60px; text-align: center; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 600; background: transparent; color: #fff;">
                         <button onclick="increaseQty(${index})" class="action-btn" style="width: 28px; height: 28px;" ${item.qty >= item.stock ? 'disabled' : ''}>
                             <i class="fas fa-plus"></i>
                         </button>
@@ -275,4 +313,93 @@ async function processPayment() {
         Modal.closeLoading();
         Notification.show({ message: 'Terjadi kesalahan', type: 'error' });
     }
+}
+
+// Load all products
+async function loadProducts() {
+    try {
+        const response = await fetch('/api/get-products.php');
+        const data = await response.json();
+        
+        if (data.success) {
+            allProducts = data.products;
+            cashierProductsPagination.setItems(allProducts);
+            displayProductsFromPagination(cashierProductsPagination.getCurrentPageItems());
+        } else {
+            document.getElementById('productList').innerHTML = 
+                '<tr><td colspan="4" class="text-center">Gagal memuat produk</td></tr>';
+        }
+    } catch (error) {
+        document.getElementById('productList').innerHTML = 
+            '<tr><td colspan="4" class="text-center">Error memuat produk</td></tr>';
+    }
+}
+
+// Display products from pagination
+function displayProductsFromPagination(products) {
+    const tbody = document.getElementById('productList');
+    
+    if (products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada produk</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = products.map(product => {
+        const isOutOfStock = parseInt(product.stock) <= 0;
+        return `
+            <tr ${isOutOfStock ? 'style="opacity: 0.5;"' : ''}>
+                <td>
+                    <div>${product.name}</div>
+                    <small style="color: var(--text-muted);">${product.sku}</small>
+                </td>
+                <td>
+                    ${formatCurrency(product.price)}
+                    ${product.discount > 0 ? `<br><small style="color: var(--error);">-${product.discount}%</small>` : ''}
+                </td>
+                <td>
+                    <span style="${isOutOfStock ? 'color: var(--error);' : ''}">${product.stock}</span>
+                </td>
+                <td>
+                    <button onclick='addToCart(${JSON.stringify(product).replace(/'/g, "\\'")})'
+                            class="btn btn-primary btn-sm"
+                            style="padding: 6px 12px;"
+                            ${isOutOfStock ? 'disabled' : ''}>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Filter products
+function filterProducts(searchTerm) {
+    const filtered = allProducts.filter(product => {
+        const term = searchTerm.toLowerCase();
+        return product.name.toLowerCase().includes(term) || 
+               product.sku.toLowerCase().includes(term);
+    });
+    cashierProductsPagination.setFilteredItems(filtered);
+    displayProductsFromPagination(cashierProductsPagination.getCurrentPageItems());
+}
+
+// Update qty from input field
+function updateQtyFromInput(index, value) {
+    const qty = parseInt(value);
+    
+    if (isNaN(qty) || qty < 1) {
+        Notification.show({ message: 'Jumlah tidak valid', type: 'error' });
+        updateCartDisplay();
+        return;
+    }
+    
+    if (qty > cart[index].stock) {
+        Notification.show({ message: 'Stok tidak mencukupi', type: 'warning' });
+        updateCartDisplay();
+        return;
+    }
+    
+    cart[index].qty = qty;
+    saveCart();
+    updateCartDisplay();
 }

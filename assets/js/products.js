@@ -2,11 +2,22 @@
 
 let products = [];
 let categories = [];
+let productsPagination;
 
 // Load products and categories on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadCategories();
     loadProducts();
+    
+    // Initialize pagination
+    productsPagination = new Pagination({
+        containerId: 'productsPagination',
+        itemsPerPage: 10,
+        perPageOptions: [10, 25, 50, 100],
+        onPageChange: (items) => {
+            displayProducts(items);
+        }
+    });
 });
 
 // Load categories
@@ -43,7 +54,8 @@ async function loadProducts() {
         
         if (data.success) {
             products = data.products;
-            displayProducts(products);
+            productsPagination.setItems(products);
+            displayProducts(productsPagination.getCurrentPageItems());
         }
     } catch (error) {
         console.error('Error loading products:', error);
@@ -101,7 +113,8 @@ function searchProducts() {
         filtered = filtered.filter(p => p.category_id == categoryId);
     }
     
-    displayProducts(filtered);
+    productsPagination.setFilteredItems(filtered);
+    displayProducts(productsPagination.getCurrentPageItems());
 }
 
 // Filter products by category
