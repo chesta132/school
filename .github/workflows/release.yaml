@@ -3,11 +3,14 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      # deb utils version
+      - "duv*"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
