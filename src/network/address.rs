@@ -1,6 +1,6 @@
 use std::{net::IpAddr, str::FromStr};
 
-use crate::command::prompt;
+use crate::cmd::Prompt;
 
 pub fn is_valid_ip(s: &str) -> bool {
     IpAddr::from_str(s).is_ok()
@@ -8,6 +8,7 @@ pub fn is_valid_ip(s: &str) -> bool {
 
 pub fn collect_addresses() -> Vec<String> {
     let mut list = Vec::new();
+    let mut prompt = Prompt::new();
 
     loop {
         let label = if list.is_empty() {
@@ -16,7 +17,7 @@ pub fn collect_addresses() -> Vec<String> {
             format!("address [{}]: ", list.join(", "))
         };
 
-        let input = prompt(&label);
+        let input = prompt.readline(&label);
 
         if input.is_empty() {
             break;
@@ -45,8 +46,9 @@ pub fn collect_addresses() -> Vec<String> {
 }
 
 pub fn collect_gateway() -> Option<String> {
+    let mut prompt = Prompt::new();
     loop {
-        let input = prompt("gateway [none]: ");
+        let input = prompt.readline("gateway [none]: ");
 
         if input.is_empty() {
             return None;

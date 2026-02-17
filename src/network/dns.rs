@@ -1,6 +1,6 @@
 use std::{net::IpAddr, str::FromStr};
 
-use crate::command::prompt;
+use crate::cmd::Prompt;
 
 pub fn is_valid_dns(s: &str) -> bool {
     IpAddr::from_str(s).is_ok()
@@ -8,6 +8,7 @@ pub fn is_valid_dns(s: &str) -> bool {
 
 pub fn collect_dns() -> Vec<String> {
     let mut dns_list: Vec<String> = Vec::new();
+    let mut prompt = Prompt::new();
 
     loop {
         let label = if dns_list.is_empty() {
@@ -16,7 +17,7 @@ pub fn collect_dns() -> Vec<String> {
             format!("dns [{}]: ", dns_list.join(", "))
         };
 
-        let input = prompt(&label);
+        let input = prompt.readline(&label);
 
         if input.is_empty() {
             break;

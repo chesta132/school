@@ -3,14 +3,15 @@ use std::fs;
 use local_ip_address::local_ip;
 
 use crate::{
-    command::{execute_command, prompt_with_default},
+    cmd::{Prompt, execute_command},
     error::Error,
     network::{dns::collect_dns, *},
 };
 
 pub fn set_dhcp() -> Result<String, Error> {
+    let mut prompt = Prompt::new();
     let default_path = "/etc/netplan/00-installer-config.yaml";
-    let config_path = prompt_with_default(
+    let config_path = prompt.readline_with_default(
         &format!("config path [{}]: ", default_path),
         default_path.to_string(),
     );

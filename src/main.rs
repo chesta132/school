@@ -3,24 +3,25 @@ use std::vec;
 use is_root::is_root;
 
 use crate::{
-    command::prompt,
+    cmd::Prompt,
     log::{print_block, print_error},
 };
 
-mod command;
 mod error;
 mod log;
 mod network;
+mod cmd;
 
 fn main() {
     if !is_root() {
         println!("program must run with root permission");
         std::process::exit(1);
     }
+    let mut prompt = Prompt::new();
     loop {
         println!("1. network");
         println!("q. quit");
-        let input = prompt("choice: ");
+        let input = prompt.readline("choice: ");
 
         match input.as_str() {
             "1" => {

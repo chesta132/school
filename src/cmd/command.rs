@@ -1,7 +1,4 @@
-use std::{
-    io::{self, Write},
-    process::{Command, Output},
-};
+use std::process::{Command, Output};
 
 use crate::error::Error;
 
@@ -30,17 +27,4 @@ pub fn execute_command<'a>(
         }),
         Ok(ok) => Ok(ok),
     }
-}
-
-pub fn prompt(label: &str) -> String {
-    print!("{}", label);
-    io::stdout().flush().unwrap();
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap();
-    input.trim().to_string()
-}
-
-pub fn prompt_with_default(label: &str, default: String) -> String {
-    let result = prompt(label);
-    if result.is_empty() { default } else { result }
 }
