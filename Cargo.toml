@@ -1,0 +1,10 @@
+[package]
+name = "deb-utils"
+version = "0.0.1"
+edition = "2024"
+
+[dependencies]
+local-ip-address = "0.6"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+is-root = "0.1.0"
