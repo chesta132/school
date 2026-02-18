@@ -6,9 +6,8 @@ pub fn is_valid_dns(s: &str) -> bool {
     IpAddr::from_str(s).is_ok()
 }
 
-pub fn collect_dns() -> Vec<String> {
+pub fn collect_dns(prompt: &mut Prompt) -> Vec<String> {
     let mut dns_list: Vec<String> = Vec::new();
-    let mut prompt = Prompt::new();
 
     loop {
         let label = if dns_list.is_empty() {

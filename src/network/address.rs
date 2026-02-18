@@ -6,9 +6,8 @@ pub fn is_valid_ip(s: &str) -> bool {
     IpAddr::from_str(s).is_ok()
 }
 
-pub fn collect_addresses() -> Vec<String> {
+pub fn collect_addresses(prompt: &mut Prompt) -> Vec<String> {
     let mut list = Vec::new();
-    let mut prompt = Prompt::new();
 
     loop {
         let label = if list.is_empty() {
@@ -43,8 +42,7 @@ pub fn collect_addresses() -> Vec<String> {
     list
 }
 
-pub fn collect_gateway() -> Option<String> {
-    let mut prompt = Prompt::new();
+pub fn collect_gateway(prompt: &mut Prompt) -> Option<String> {
     loop {
         let input = prompt.readline("gateway [none]: ");
         if input.is_empty() {

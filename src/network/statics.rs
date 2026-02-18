@@ -17,22 +17,22 @@ pub fn set_static() -> Result<(String, Vec<(&'static str, String)>), Error> {
     let config_path =
         prompt.readline_with_default(&format!("config path [{}]: ", default_path), default_path);
 
-    let mut addresses = collect_addresses();
+    let mut addresses = collect_addresses(&mut prompt);
     while addresses.is_empty() {
         log_warn("at least one address is required");
-        addresses = collect_addresses();
+        addresses = collect_addresses(&mut prompt);
     }
 
-    let mut gateway = collect_gateway();
+    let mut gateway = collect_gateway(&mut prompt);
     while gateway.is_none() {
         log_warn("a gateway is required");
-        gateway = collect_gateway();
+        gateway = collect_gateway(&mut prompt);
     }
 
-    let mut dns_list = collect_dns();
+    let mut dns_list = collect_dns(&mut prompt);
     while dns_list.is_empty() {
         log_warn("at least one DNS server is required");
-        dns_list = collect_dns();
+        dns_list = collect_dns(&mut prompt);
     }
 
     let nameservers = Some(NameServers {
