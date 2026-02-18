@@ -38,7 +38,14 @@
 ## Installation
 
 ```bash
-git clone https://github.com/your-username/deb-utils
+# Built version
+wget https://github.com/chesta132/school/releases/download/duv0.0.2/deb-utils
+sudo ./deb-utils
+```
+
+```bash
+# Self-build version
+git clone -b deb-utils https://github.com/chesta132/school deb-utils
 cd deb-utils
 cargo build --release
 sudo ./target/release/deb-utils
