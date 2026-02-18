@@ -44,7 +44,7 @@ pub fn register(ip: &String, domain: &String) -> Result<(), Error> {
         error_on: "register",
         error_while: "read /etc/resolv.conf",
     })?;
-    let new_nameserver = format!("\nnameserver {ip}");
+    let new_nameserver = format!("nameserver {ip}");
 
     if !resolv_content.contains(&new_nameserver) {
         fs::write(

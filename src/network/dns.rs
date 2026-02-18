@@ -1,6 +1,6 @@
 use std::{net::IpAddr, str::FromStr};
 
-use crate::cmd::Prompt;
+use crate::{cmd::Prompt, log::log_warn};
 
 pub fn is_valid_dns(s: &str) -> bool {
     IpAddr::from_str(s).is_ok()
@@ -18,15 +18,13 @@ pub fn collect_dns() -> Vec<String> {
         };
 
         let input = prompt.readline(&label);
-
         if input.is_empty() {
             break;
         }
-
         if is_valid_dns(&input) {
             dns_list.push(input);
         } else {
-            println!("invalid dns address");
+            log_warn("invalid DNS address");
         }
     }
 

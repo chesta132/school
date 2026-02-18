@@ -1,25 +1,122 @@
+use colored::Colorize;
+
 use crate::error::Error;
 
-pub fn print_block(logs: Vec<String>) {
-    println!("====================================");
-    for log in logs {
-        println!("{}", log);
-    }
-    println!("====================================");
+// ─── Symbols ─────────────────────────────────────────────────────────────────
+const TICK:  &str = "✓";
+const CROSS: &str = "✗";
+const INFO:  &str = "○";
+const ARROW: &str = "▲";
+const WAIT:  &str = "●";
+
+// ─── Public API ──────────────────────────────────────────────────────────────
+
+/// Print a single info/neutral log line.
+pub fn log_info(msg: &str) {
+    println!(" {} {}", INFO.cyan(), msg.white());
 }
 
-pub fn print_error(err: Error) {
-    let mut logs = vec![
-        format!("error found on {}", err.error_on),
-        format!("error found while {}", err.error_while),
-    ];
-    logs.append(
-        &mut err
-            .error
-            .iter()
-            .map(|e| format!("{:?}", e.as_ref()))
-            .collect::<Vec<String>>(),
-    );
+/// Print a success line (green tick, like Next.js "Ready").
+pub fn log_success(msg: &str) {
+    println!(" {} {}", TICK.green(), msg.bold().white());
+}
 
-    print_block(logs);
+/// Print a warning line (yellow triangle).
+pub fn log_warn(msg: &str) {
+    println!(" {} {}", ARROW.yellow(), msg.yellow());
+}
+
+/// Print an action that is currently running (label + detail).
+pub fn log_step(label: &str, msg: &str) {
+    let padded = format!("{:<12}", label);
+    println!(" {} {} {}", WAIT.bright_cyan(), padded.cyan().bold(), msg.white());
+}
+
+/// Print a key-value pair (like Next.js "- Local: http://localhost:3000").
+pub fn log_kv(key: &str, value: &str) {
+    let padded = format!("{:<14}", key);
+    println!("   {} {}  {}", "-".bright_black(), padded.white(), value.bright_white().bold());
+}
+
+/// Print an error block, styled like Next.js error output.
+pub fn log_error(err: &Error) {
+    let border = "─".repeat(50).bright_black().to_string();
+
+    eprintln!();
+    eprintln!(" {} {}", CROSS.red().bold(), " Error ".on_red().white().bold());
+    eprintln!(" {}", border);
+    eprintln!(
+        "   {} {}",
+        "on:".bright_black(),
+        err.error_on.white()
+    );
+    eprintln!(
+        "   {} {}",
+        "while:".bright_black(),
+        err.error_while.white()
+    );
+    eprintln!(" {}", border);
+    for e in &err.error {
+        eprintln!("   {} {}", "│".red(), format!("{:?}", e.as_ref()).bright_white());
+    }
+    eprintln!(" {}", border);
+    eprintln!();
+}
+
+/// Print a titled result box (success summary).
+pub fn log_result(title: &str, pairs: Vec<(&str, String)>) {
+    let border_top    = format!(" ┌{}┐", "─".repeat(48)).bright_black();
+    let border_bottom = format!(" └{}┘", "─".repeat(48)).bright_black();
+
+    println!();
+    println!("{}", border_top);
+    println!(
+        " {} {:<46} {}",
+        "│".bright_black(),
+        format!(" {} {}", TICK.green(), title.bold()),
+        "│".bright_black()
+    );
+    println!(
+        " {}{}{}",
+        "├".bright_black(),
+        "─".repeat(48).bright_black(),
+        "┤".bright_black()
+    );
+    for (key, val) in pairs {
+        println!(
+            " {} {:<14}  {:<30} {}",
+            "│".bright_black(),
+            key.bright_black(),
+            val.bright_white().bold(),
+            "│".bright_black()
+        );
+    }
+    println!("{}", border_bottom);
+    println!();
+}
+
+/// Print the top-level menu header banner.
+pub fn log_banner() {
+    println!();
+    println!("{}", "  ┌─────────────────────────────────────┐".bright_cyan());
+    println!("{}", "  │         deb-utils  v0.0.1            │".bright_cyan());
+    println!("{}", "  └─────────────────────────────────────┘".bright_cyan());
+    println!();
+    println!(
+        "   {} {}",
+        INFO.cyan(),
+        "Debian Server Utilities".white()
+    );
+    println!();
+}
+
+/// Print a section divider with a label.
+pub fn log_section(label: &str) {
+    println!();
+    println!(" {} {}", ARROW.bright_cyan().bold(), label.white().bold());
+}
+
+/// Print an invalid-choice warning.
+pub fn log_invalid_choice() {
+    log_warn("invalid choice, try again");
 }

@@ -1,6 +1,6 @@
 use std::{net::IpAddr, str::FromStr};
 
-use crate::cmd::Prompt;
+use crate::{cmd::Prompt, log::log_warn};
 
 pub fn is_valid_ip(s: &str) -> bool {
     IpAddr::from_str(s).is_ok()
@@ -18,13 +18,11 @@ pub fn collect_addresses() -> Vec<String> {
         };
 
         let input = prompt.readline(&label);
-
         if input.is_empty() {
             break;
         }
 
         let parts: Vec<&str> = input.split('/').collect();
-
         match parts.as_slice() {
             [ip, cidr] => {
                 let valid_cidr = cidr
@@ -35,10 +33,10 @@ pub fn collect_addresses() -> Vec<String> {
                 if is_valid_ip(ip) && valid_cidr {
                     list.push(input);
                 } else {
-                    println!("invalid address, use CIDR format (example: 192.168.1.10/24)");
+                    log_warn("invalid address, use CIDR format (e.g. 192.168.1.10/24)");
                 }
             }
-            _ => println!("invalid address, use CIDR format (example: 192.168.1.10/24)"),
+            _ => log_warn("invalid address, use CIDR format (e.g. 192.168.1.10/24)"),
         }
     }
 
@@ -49,15 +47,12 @@ pub fn collect_gateway() -> Option<String> {
     let mut prompt = Prompt::new();
     loop {
         let input = prompt.readline("gateway [none]: ");
-
         if input.is_empty() {
             return None;
         }
-
         if is_valid_ip(&input) {
             return Some(input);
-        } else {
-            println!("invalid gateway address");
         }
+        log_warn("invalid gateway address");
     }
 }

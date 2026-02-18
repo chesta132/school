@@ -7,7 +7,7 @@ pub fn execute_command<'a>(
     on: &'static str,
     while_do: &'static str,
 ) -> Result<Output, Error> {
-    if commands.len() <= 0 {
+    if commands.is_empty() {
         return Err(Error {
             error_on: on,
             error_while: while_do,
@@ -19,12 +19,9 @@ pub fn execute_command<'a>(
     commands.remove(0);
     cmd.args(commands.as_slice());
 
-    match cmd.output() {
-        Err(err) => Err(Error {
-            error: vec![Box::new(err)],
-            error_on: on,
-            error_while: while_do,
-        }),
-        Ok(ok) => Ok(ok),
-    }
+    cmd.output().map_err(|err| Error {
+        error: vec![Box::new(err)],
+        error_on: on,
+        error_while: while_do,
+    })
 }
