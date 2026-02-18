@@ -9,9 +9,17 @@ pub fn print_block(logs: Vec<String>) {
 }
 
 pub fn print_error(err: Error) {
-    print_block(vec![
+    let mut logs = vec![
         format!("error found on {}", err.error_on),
         format!("error found while {}", err.error_while),
-        format!("{:#?}", err.error),
-    ]);
+    ];
+    logs.append(
+        &mut err
+            .error
+            .iter()
+            .map(|e| format!("{:?}", e.as_ref()))
+            .collect::<Vec<String>>(),
+    );
+
+    print_block(logs);
 }
