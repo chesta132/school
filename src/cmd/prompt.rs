@@ -23,8 +23,8 @@ impl Prompt {
         }
     }
 
-    pub fn readline_with_default(&mut self, label: &str, default: String) -> String {
+    pub fn readline_with_default(&mut self, label: &str, default: &str) -> String {
         let result = self.readline(label);
-        if result.is_empty() { default } else { result }
+        if result.is_empty() { default.to_string() } else { result }
     }
 }

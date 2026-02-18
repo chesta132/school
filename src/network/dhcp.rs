@@ -11,10 +11,8 @@ use crate::{
 pub fn set_dhcp() -> Result<String, Error> {
     let mut prompt = Prompt::new();
     let default_path = "/etc/netplan/00-installer-config.yaml";
-    let config_path = prompt.readline_with_default(
-        &format!("config path [{}]: ", default_path),
-        default_path.to_string(),
-    );
+    let config_path =
+        prompt.readline_with_default(&format!("config path [{}]: ", default_path), &default_path);
 
     let dns_list = collect_dns();
     let nameservers = if dns_list.is_empty() {

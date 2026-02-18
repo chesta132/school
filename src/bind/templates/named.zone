@@ -1,0 +1,10 @@
+
+zone "$domain" {
+	type master;
+	file "/etc/bind/db.$domain";
+};
+===
+zone "$reversed_ip.in-addr.arpa" {
+	type master;
+	file "/etc/bind/db.$base_ip";
+};
