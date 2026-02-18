@@ -99,7 +99,7 @@ pub fn log_result(title: &str, pairs: Vec<(&str, String)>) {
 pub fn log_banner() {
     println!();
     println!("{}", "  ┌─────────────────────────────────────┐".bright_cyan());
-    println!("{}", "  │          deb-utils  v0.0.2          │".bright_cyan());
+    println!("{}", "  │          deb-utils  v0.0.3          │".bright_cyan());
     println!("{}", "  └─────────────────────────────────────┘".bright_cyan());
     println!();
     println!(

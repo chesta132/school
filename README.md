@@ -1,16 +1,17 @@
 # deb-utils
 
-> Interactive CLI utility for configuring **network** and **DNS (BIND9)** on Debian-based servers.
+> Interactive CLI utility for configuring **network**, **DNS (BIND9)**, and **Samba** on Debian-based servers.
 
 ```
   ┌─────────────────────────────────────────┐
-  │           deb-utils  v0.0.2             │
+  │           deb-utils  v0.0.4             │
   └─────────────────────────────────────────┘
   ○  Debian Server Utilities
 
   ▲ Main Menu
      1  network
      2  bind9
+     3  samba
      q  quit
 
   ❯
@@ -22,6 +23,7 @@
 
 - **Network configuration** — set interface to DHCP or Static IP via netplan
 - **BIND9 setup** — auto-install, configure forward/reverse zones, and register domain
+- **Samba file sharing** — auto-install, configure shared folders with user access control
 - **Colored output** — pretty, structured logs inspired by Next.js CLI
 - **Interactive prompts** — readline-based input with history and default values
 
@@ -39,7 +41,7 @@
 
 ```bash
 # Built version
-wget https://github.com/chesta132/school/releases/download/duv0.0.2/deb-utils
+wget https://github.com/chesta132/school/releases/download/duv0.0.4/deb-utils
 sudo ./deb-utils
 ```
 
@@ -120,6 +122,62 @@ Automatically:
 - Updates `/etc/resolv.conf` with the new nameserver
 - Restarts `bind9` service
 
+### Samba File Sharing
+
+```
+❯ 3
+● Installing   samba
+
+▲  Samba Configuration
+   1  share
+   q  back
+
+❯ 1
+share name: data
+path: /srv/data
+read only (y/n) [n]: n
+browseable (y/n) [y]: y
+valid users [none]: chesta
+valid users [chesta]:
+admin users [none]: chesta
+admin users [chesta]:
+/srv/data permission access [777]: 770
+
+● Create        /srv/data
+● Set           permission
+● Apply         config
+● Restarting    samba
+
+ℹ Don't forget to
+    > sudo smbpasswd -a chesta
+
+ ┌────────────────────────────────────────────────┐
+ │  ✓ Shared folder with samba configured         │
+ ├────────────────────────────────────────────────┤
+ │ name             data                          │
+ │ path             /srv/data                     │
+ │ read only        false                         │
+ │ browseable       true                          │
+ │ valid users      chesta                         │
+ │ admin users      chesta                         │
+ └────────────────────────────────────────────────┘
+```
+
+Automatically:
+
+- Installs `samba` via `apt`
+- Creates the target directory if it doesn't exist
+- Sets directory permission via `chmod -R`
+- Appends share block to `/etc/samba/smb.conf`
+- Restarts `smbd` and `nmbd` services
+- Reminds you to run `smbpasswd -a` for each user
+
+> **Note:** After setup, register each user's Samba password manually:
+>
+> ```bash
+> sudo smbpasswd -a <username>
+> ```
+
 ---
 
 ## Project Structure
@@ -130,7 +188,8 @@ src/
 ├── log.rs             # colored logging utilities
 ├── file.rs            # file open/read helpers
 ├── error/
-│   └── error_type.rs  # shared Error struct
+│   └── types.rs  # shared Error struct
+│   └── mod.rs    # error submenu
 ├── cmd/
 │   ├── prompt.rs      # rustyline wrapper
 │   └── command.rs     # shell command executor
@@ -141,15 +200,19 @@ src/
 │   ├── statics.rs     # static IP configuration
 │   ├── address.rs     # IP/CIDR input & validation
 │   └── dns.rs         # DNS input & validation
-└── bind/
-    ├── mod.rs          # bind9 setup flow
-    ├── forward.rs      # forward zone writer
-    ├── reverse.rs      # reverse zone writer
-    ├── register.rs     # named.conf.local + resolv.conf
-    └── templates/
-        ├── db.forward  # forward zone template
-        ├── db.reverse  # reverse zone template
-        └── named.zone  # named.conf zone block template
+├── bind/
+│   ├── mod.rs          # bind9 setup flow
+│   ├── forward.rs      # forward zone writer
+│   ├── reverse.rs      # reverse zone writer
+│   ├── register.rs     # named.conf.local + resolv.conf
+│   └── templates/
+│       ├── db.forward  # forward zone template
+│       ├── db.reverse  # reverse zone template
+│       └── named.zone  # named.conf zone block template
+└── samba/
+    ├── mod.rs          # samba submenu & install flow
+    ├── share.rs        # shared folder configuration
+    └── types.rs        # ShareConfig struct & smb.conf serialization
 ```
 
 ---
