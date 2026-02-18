@@ -2,7 +2,7 @@ use local_ip_address::local_ip;
 use regex::Regex;
 
 use crate::{
-    cmd::{Prompt, execute_command},
+    cmd::{Prompt, execute_command, install_pkg},
     error::Error,
     log::{log_step, log_warn},
     network,
@@ -19,12 +19,9 @@ fn is_valid_domain(domain: &str) -> bool {
 }
 
 pub fn run() -> Result<(String, Vec<(&'static str, String)>), Error> {
-    log_step("Installing", "bind9");
-    execute_command(
-        &mut vec!["apt", "install", "bind9", "-y"],
-        "bind9",
-        "install bind9",
-    )?;
+    install_pkg(&vec!["bind9"], "bind9", "install bind9", || {
+        log_step("Installing", "bind9")
+    })?;
 
     let mut prompt = Prompt::new();
     let self_ip = local_ip().unwrap().to_string();

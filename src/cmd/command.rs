@@ -1,9 +1,9 @@
 use std::process::{Command, Output};
 
-use crate::error::Error;
+use crate::error::{self, Error};
 
 pub fn execute_command<'a>(
-    commands: &mut Vec<&'a str>,
+    commands: &Vec<&'a str>,
     on: &'static str,
     while_do: &'static str,
 ) -> Result<Output, Error> {
@@ -15,6 +15,7 @@ pub fn execute_command<'a>(
         });
     }
 
+    let mut commands = commands.clone();
     let mut cmd = Command::new(commands[0]);
     commands.remove(0);
     cmd.args(commands.as_slice());
@@ -24,6 +25,42 @@ pub fn execute_command<'a>(
         error_on: on,
         error_while: while_do,
     })
+}
+
+fn is_pkg_installed(pkg: &str, while_do: &'static str) -> error::Result<bool> {
+    let check = execute_command(&vec!["dpkg", "-s", pkg], "is_pkg_installed", while_do)?;
+    Ok(check.status.success())
+}
+
+fn filter_uninstalled_pkg<'a>(
+    pkgs: &Vec<&'a str>,
+    while_do: &'static str,
+) -> error::Result<Vec<&'a str>> {
+    let mut uninstalled = vec![];
+    for pkg in pkgs {
+        let is_installed = is_pkg_installed(pkg, while_do)?;
+        if !is_installed {
+            uninstalled.push(*pkg);
+        }
+    }
+    Ok(uninstalled)
+}
+
+pub fn install_pkg(
+    pkgs: &Vec<&str>,
+    on: &'static str,
+    while_do: &'static str,
+    mut on_install: impl FnMut(),
+) -> error::Result<bool> {
+    let pkgs = filter_uninstalled_pkg(pkgs, while_do)?;
+    if pkgs.is_empty() {
+        return Ok(false);
+    }
+    let install = [vec!["apt", "install"], pkgs, vec!["-y"]].concat();
+
+    on_install();
+    execute_command(&install, on, while_do)?;
+    Ok(true)
 }
 
 pub fn is_valid_chmod(s: &str) -> bool {

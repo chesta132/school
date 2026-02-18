@@ -4,19 +4,16 @@ mod types;
 pub use types::*;
 
 use crate::{
-    cmd::{Prompt, execute_command},
+    cmd::{Prompt, install_pkg},
     error,
     log::{log_invalid_choice, log_section, log_step},
 };
 
 pub fn run() -> error::Result<(String, Vec<(&'static str, String)>)> {
     let mut prompt = Prompt::new();
-    log_step("Installing", "samba");
-    execute_command(
-        &mut vec!["apt", "install", "samba", "-y"],
-        "bind9",
-        "install samba",
-    )?;
+    install_pkg(&vec!["samba"], "bind9", "install samba", || {
+        log_step("Installing", "samba")
+    })?;
 
     loop {
         log_section("Samba Configuration");
