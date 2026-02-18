@@ -9,6 +9,7 @@ mod file;
 mod log;
 mod network;
 mod samba;
+mod apache;
 
 fn execute(f: fn() -> error::Result<(String, Vec<(&'static str, String)>)>) {
     match f() {
@@ -32,6 +33,7 @@ fn main() {
         println!("   1  network");
         println!("   2  bind9");
         println!("   3  samba");
+        println!("   4  apache2");
         println!("   q  quit");
         println!();
 
@@ -41,6 +43,7 @@ fn main() {
             "1" => execute(network::run),
             "2" => execute(bind::run),
             "3" => execute(samba::run),
+            "4" => execute(apache::run),
             "q" | "Q" => {
                 println!();
                 break;

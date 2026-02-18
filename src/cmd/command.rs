@@ -3,7 +3,7 @@ use std::process::{Command, Output};
 use crate::error::{self, Error};
 
 pub fn execute_command<'a>(
-    commands: &Vec<&'a str>,
+    commands: &[&'a str],
     on: &'static str,
     while_do: &'static str,
 ) -> Result<Output, Error> {
@@ -15,7 +15,7 @@ pub fn execute_command<'a>(
         });
     }
 
-    let mut commands = commands.clone();
+    let mut commands = commands.to_vec();
     let mut cmd = Command::new(commands[0]);
     commands.remove(0);
     cmd.args(commands.as_slice());
@@ -33,7 +33,7 @@ fn is_pkg_installed(pkg: &str, while_do: &'static str) -> error::Result<bool> {
 }
 
 fn filter_uninstalled_pkg<'a>(
-    pkgs: &Vec<&'a str>,
+    pkgs: &[&'a str],
     while_do: &'static str,
 ) -> error::Result<Vec<&'a str>> {
     let mut uninstalled = vec![];
@@ -47,7 +47,7 @@ fn filter_uninstalled_pkg<'a>(
 }
 
 pub fn install_pkg(
-    pkgs: &Vec<&str>,
+    pkgs: &[&str],
     on: &'static str,
     while_do: &'static str,
     mut on_install: impl FnMut(),
@@ -61,6 +61,25 @@ pub fn install_pkg(
     on_install();
     execute_command(&install, on, while_do)?;
     Ok(true)
+}
+
+pub fn execute_command_must_success<'a>(
+    commands: &[&'a str],
+    on: &'static str,
+    while_do: &'static str,
+) -> Result<Output, Error> {
+    let output = execute_command(commands, on, while_do)?;
+    if !output.status.success() {
+        return Err(Error {
+            error: vec![
+                Box::new("command execute not success"),
+                Box::new(String::from_utf8(output.stderr)),
+            ],
+            error_on: on,
+            error_while: while_do,
+        });
+    }
+    Ok(output)
 }
 
 pub fn is_valid_chmod(s: &str) -> bool {
