@@ -1,10 +1,10 @@
 # deb-utils
 
-> Interactive CLI utility for configuring **network**, **DNS (BIND9)**, and **Samba** on Debian-based servers.
+> Interactive CLI utility for configuring **network**, **DNS (BIND9)**, **Samba**, and **Apache2** on Debian-based servers.
 
 ```
   ┌─────────────────────────────────────────┐
-  │           deb-utils  v0.0.3             │
+  │           deb-utils  v0.0.4             │
   └─────────────────────────────────────────┘
   ○  Debian Server Utilities
 
@@ -12,6 +12,7 @@
      1  network
      2  bind9
      3  samba
+     4  apache2
      q  quit
 
   ❯
@@ -24,6 +25,7 @@
 - **Network configuration** — set interface to DHCP or Static IP via netplan
 - **BIND9 setup** — auto-install, configure forward/reverse zones, and register domain
 - **Samba file sharing** — auto-install, configure shared folders with user access control
+- **Apache2 web server** — auto-install, import GitHub repository as website source
 - **Colored output** — pretty, structured logs inspired by Next.js CLI
 - **Interactive prompts** — readline-based input with history and default values
 
@@ -41,7 +43,7 @@
 
 ```bash
 # Built version
-wget https://github.com/chesta132/school/releases/download/duv0.0.3/deb-utils
+wget https://github.com/chesta132/school/releases/download/duv0.0.4/deb-utils
 sudo ./deb-utils
 ```
 
@@ -148,7 +150,7 @@ admin users [chesta]:
 ● Apply         config
 ● Restarting    samba
 
-ℹ Don't forget to
+○ Don't forget to
     > sudo smbpasswd -a chesta
 
  ┌────────────────────────────────────────────────┐
@@ -178,6 +180,50 @@ Automatically:
 > sudo smbpasswd -a <username>
 > ```
 
+### Apache2 Web Server
+
+```
+❯ 4
+● Installing   apache2
+
+▲  Apache2 Configuration
+   1  import github repository
+   q  back
+
+❯ 1
+● Installing   git
+github username: chesta132
+github repository: school
+repository branch [none]: pos-php
+▲ this action deletes your /var/www/html directory and all files inside
+are you sure to continue (y/n) [n]: y
+
+● Remove       /var/www/html
+● Import       school
+● Set          permission
+
+ ┌────────────────────────────────────────────────┐
+ │  ✓ Successfully import school                  │
+ ├────────────────────────────────────────────────┤
+ │ username         chesta132                     │
+ │ repository       school                        │
+ │ branch           pos-php                       │
+ └────────────────────────────────────────────────┘
+```
+
+Automatically:
+
+- Installs `apache2` and `git` via `apt`
+- Prompts for GitHub username, repository, and optional branch
+- Removes existing `/var/www/html` directory (with confirmation)
+- Clones the GitHub repository to `/var/www/html`
+- Sets proper ownership and permissions:
+  - Directories: `755`
+  - Files: `644`
+  - Owner: matches `/var/www` owner (typically `www-data`)
+
+> **Note:** The repository should contain web files (HTML, CSS, JS, PHP, etc.) that will be served by Apache2. After import, your website will be immediately accessible via the server's IP address or configured domain.
+
 ---
 
 ## Project Structure
@@ -188,8 +234,8 @@ src/
 ├── log.rs             # colored logging utilities
 ├── file.rs            # file open/read helpers
 ├── error/
-│   └── types.rs  # shared Error struct
-│   └── mod.rs    # error submenu
+│   ├── mod.rs         # error submenu
+│   └── types.rs       # shared Error struct
 ├── cmd/
 │   ├── prompt.rs      # rustyline wrapper
 │   └── command.rs     # shell command executor
@@ -201,18 +247,22 @@ src/
 │   ├── address.rs     # IP/CIDR input & validation
 │   └── dns.rs         # DNS input & validation
 ├── bind/
-│   ├── mod.rs          # bind9 setup flow
-│   ├── forward.rs      # forward zone writer
-│   ├── reverse.rs      # reverse zone writer
-│   ├── register.rs     # named.conf.local + resolv.conf
+│   ├── mod.rs         # bind9 setup flow
+│   ├── forward.rs     # forward zone writer
+│   ├── reverse.rs     # reverse zone writer
+│   ├── register.rs    # named.conf.local + resolv.conf
 │   └── templates/
 │       ├── db.forward  # forward zone template
 │       ├── db.reverse  # reverse zone template
 │       └── named.zone  # named.conf zone block template
-└── samba/
-    ├── mod.rs          # samba submenu & install flow
-    ├── share.rs        # shared folder configuration
-    └── types.rs        # ShareConfig struct & smb.conf serialization
+├── samba/
+│   ├── mod.rs         # samba submenu & install flow
+│   ├── share.rs       # shared folder configuration
+│   └── types.rs       # ShareConfig struct & smb.conf serialization
+└── apache/
+    ├── mod.rs         # apache2 submenu & install flow
+    ├── git.rs         # GitHub repository import
+    └── source.rs      # /var/www/html management & permission helpers
 ```
 
 ---
