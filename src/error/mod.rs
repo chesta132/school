@@ -1,2 +1,2 @@
-mod error_type;
-pub use error_type::*;
+mod types;
+pub use types::*;
