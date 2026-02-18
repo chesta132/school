@@ -4,7 +4,7 @@
 
 ```
   ┌─────────────────────────────────────────┐
-  │           deb-utils  v0.0.4             │
+  │           deb-utils  v0.0.3             │
   └─────────────────────────────────────────┘
   ○  Debian Server Utilities
 
@@ -41,7 +41,7 @@
 
 ```bash
 # Built version
-wget https://github.com/chesta132/school/releases/download/duv0.0.4/deb-utils
+wget https://github.com/chesta132/school/releases/download/duv0.0.3/deb-utils
 sudo ./deb-utils
 ```
 
