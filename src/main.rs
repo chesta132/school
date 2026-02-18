@@ -8,6 +8,14 @@ mod error;
 mod file;
 mod log;
 mod network;
+mod samba;
+
+fn execute(f: fn() -> error::Result<(String, Vec<(&'static str, String)>)>) {
+    match f() {
+        Err(err) => log_error(&err),
+        Ok((title, pairs)) => log_result(&title, pairs),
+    }
+}
 
 fn main() {
     log_banner();
@@ -23,20 +31,16 @@ fn main() {
         log_section("Main Menu");
         println!("   1  network");
         println!("   2  bind9");
+        println!("   3  samba");
         println!("   q  quit");
         println!();
 
         let input = prompt.readline("❯ ");
 
         match input.as_str() {
-            "1" => match network::run() {
-                Err(err) => log_error(&err),
-                Ok((title, pairs)) => log_result(&title, pairs),
-            },
-            "2" => match bind::run() {
-                Err(err) => log_error(&err),
-                Ok((title, pairs)) => log_result(&title, pairs),
-            },
+            "1" => execute(network::run),
+            "2" => execute(bind::run),
+            "3" => execute(samba::run),
             "q" | "Q" => {
                 println!();
                 break;

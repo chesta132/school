@@ -25,3 +25,7 @@ pub fn execute_command<'a>(
         error_while: while_do,
     })
 }
+
+pub fn is_valid_chmod(s: &str) -> bool {
+    s.len() == 3 && s.chars().all(|c| c.is_ascii_digit() && c <= '7')
+}
