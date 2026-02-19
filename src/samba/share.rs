@@ -45,7 +45,7 @@ pub fn share() -> Result<(String, Vec<(&'static str, String)>)> {
     )?;
 
     log_step("Apply", "config");
-    let mut smb = open_with_append_or_create("/etc/samba/smb.conf");
+    let mut smb = open_with_append_or_create("/etc/samba/smb.conf", "open /etc/samba/smb.conf")?;
     smb.write_all(format!("\n{}", config.to_string()).as_bytes())
         .map_err(|err| Error {
             error: vec![Box::new(err)],
