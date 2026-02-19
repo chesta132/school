@@ -1,6 +1,7 @@
 use std::{fs, io::Write};
 
 use crate::{
+    cmd::Prompt,
     error::Error,
     file::{open_with_append_or_create, read_file},
 };
@@ -23,16 +24,22 @@ pub fn register(ip: &String, domain: &String) -> Result<(), Error> {
         .map(str::to_owned)
         .collect::<Vec<String>>();
 
-    let mut conf = open_with_append_or_create("/etc/bind/named.conf.local");
+    let conf_path = "/etc/bind/named.conf.local";
+    let conf_path = Prompt::new().readline_with_default(
+        &format!("register config path [{}]: ", conf_path),
+        conf_path,
+    );
+
+    let mut conf = open_with_append_or_create(&conf_path);
     let existing = read_file(&mut conf);
 
     let zone_to_append = if existing.contains(zone[1].trim()) {
-        "\n".to_string() + &zone[0]
+        &zone[0]
     } else {
-        zone.join("\n")
+        &zone.join("\n")
     };
 
-    conf.write_all(zone_to_append.as_bytes())
+    conf.write_all(("\n".to_string() + zone_to_append).as_bytes())
         .map_err(|err| Error {
             error: vec![Box::new(err)],
             error_on: "register",
