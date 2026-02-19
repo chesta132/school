@@ -8,7 +8,7 @@ use crate::{
 
 const NAMED_ZONE: &str = include_str!("./templates/named.zone");
 
-pub fn register(ip: &String, domain: &String) -> Result<(), Error> {
+pub fn register(ip: &String, domain: &String) -> Result<String, Error> {
     let mut reversed_ip = ip.split('.').collect::<Vec<&str>>();
     reversed_ip.pop();
     reversed_ip.reverse();
@@ -65,5 +65,5 @@ pub fn register(ip: &String, domain: &String) -> Result<(), Error> {
         })?;
     }
 
-    Ok(())
+    Ok(conf_path)
 }

@@ -45,7 +45,7 @@ pub fn run() -> Result<(String, Vec<(&'static str, String)>), Error> {
     forward::forward(&ip, &domain)?;
 
     log_step("Registering", "named.conf.local");
-    register::register(&ip, &domain)?;
+    let register_zone = register::register(&ip, &domain)?;
 
     log_step("Restarting", "bind9 service");
     execute_command(
@@ -56,6 +56,10 @@ pub fn run() -> Result<(String, Vec<(&'static str, String)>), Error> {
 
     Ok((
         "DNS Registered".to_string(),
-        vec![("Domain", domain), ("IP", ip)],
+        vec![
+            ("Domain", domain),
+            ("IP", ip),
+            ("Registered zone path", register_zone),
+        ],
     ))
 }
