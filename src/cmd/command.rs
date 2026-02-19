@@ -40,7 +40,7 @@ pub fn install_pkg(
     let install = [vec!["apt", "install"], pkgs, vec!["-y"]].concat();
 
     on_install();
-    execute_command(&install, on, while_do)?;
+    execute_command_must_success(&install, on, while_do)?;
     Ok(true)
 }
 
