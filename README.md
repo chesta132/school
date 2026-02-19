@@ -4,7 +4,7 @@
 
 ```
   ┌─────────────────────────────────────────┐
-  │           deb-utils  v0.0.4             │
+  │           deb-utils  v0.0.5             │
   └─────────────────────────────────────────┘
   ○  Debian Server Utilities
 
@@ -23,7 +23,7 @@
 ## Features
 
 - **Network configuration** — set interface to DHCP or Static IP via netplan
-- **BIND9 setup** — auto-install, configure forward/reverse zones, and register domain
+- **BIND9 setup** — auto-install, configure forward/reverse zones with smart duplicate detection
 - **Samba file sharing** — auto-install, configure shared folders with user access control
 - **Apache2 web server** — auto-install, import GitHub repository as website source
 - **Colored output** — pretty, structured logs inspired by Next.js CLI
@@ -43,7 +43,8 @@
 
 ```bash
 # Built version
-wget https://github.com/chesta132/school/releases/download/duv0.0.4/deb-utils
+wget https://github.com/chesta132/school/releases/download/duv0.0.5/deb-utils
+sudo chmod +x deb-utils
 sudo ./deb-utils
 ```
 
@@ -105,6 +106,7 @@ domain: example.sch.id
 ● Writing      reverse zone
 ● Writing      forward zone
 ● Registering  named.conf.local
+register config path [/etc/bind/named.conf.local]:
 ● Restarting   bind9 service
 
  ┌────────────────────────────────────────────────┐
@@ -112,16 +114,48 @@ domain: example.sch.id
  ├────────────────────────────────────────────────┤
  │ Domain          example.sch.id                 │
  │ IP              192.168.1.10                   │
+ │ Zone path       /etc/bind/named.conf.local     │
  └────────────────────────────────────────────────┘
 ```
 
-Automatically:
+**Smart Duplicate Detection:**
+
+The BIND9 module now intelligently handles existing configurations:
+
+- **Scans all included configs** — checks `/etc/bind/named.conf` and all included files for existing zones
+- **Append-only mode** — adds only missing forward/reverse zones, never rewrites entire config
+- **Skip duplicate PTR records** — prevents adding duplicate entries in reverse zone files
+- **Detects existing domains** — if domain/IP already registered, skips zone creation entirely
+
+```
+❯ 2
+● Installing   bind9
+ip [192.168.1.10]:
+domain: example.sch.id
+
+● Writing      reverse zone
+● Writing      forward zone
+● Registering  named.conf.local
+● Restarting   bind9 service
+
+ ┌────────────────────────────────────────────────┐
+ │  ✓ DNS Already Registered                      │
+ ├────────────────────────────────────────────────┤
+ │ Domain          example.sch.id                 │
+ │ IP              192.168.1.10                   │
+ └────────────────────────────────────────────────┘
+```
+
+This means you can safely re-run BIND9 setup without breaking existing configurations or creating conflicts.
+
+**What it does automatically:**
 
 - Installs `bind9` via `apt`
-- Writes `/etc/bind/db.<domain>` (forward zone)
-- Writes `/etc/bind/db.<ip-base>` (reverse zone)
-- Appends zone entries to `/etc/bind/named.conf.local`
-- Updates `/etc/resolv.conf` with the new nameserver
+- Writes `/etc/bind/db.<domain>` (forward zone) — skips if content matches
+- Writes `/etc/bind/db.<ip-base>` (reverse zone) — appends PTR records only
+- Appends zone entries to `/etc/bind/named.conf.local` (or custom path) — adds only missing zones
+- Scans all included config files to prevent duplicates across multiple files
+- Updates `/etc/resolv.conf` with the new nameserver — skips if already present
 - Restarts `bind9` service
 
 ### Samba File Sharing
@@ -248,9 +282,10 @@ src/
 │   └── dns.rs         # DNS input & validation
 ├── bind/
 │   ├── mod.rs         # bind9 setup flow
-│   ├── forward.rs     # forward zone writer
-│   ├── reverse.rs     # reverse zone writer
-│   ├── register.rs    # named.conf.local + resolv.conf
+│   ├── lib.rs         # shared helpers & zone config scanner
+│   ├── forward.rs     # forward zone writer with duplicate detection
+│   ├── reverse.rs     # reverse zone writer with PTR append logic
+│   ├── register.rs    # named.conf zone registration with smart scanning
 │   └── templates/
 │       ├── db.forward  # forward zone template
 │       ├── db.reverse  # reverse zone template
