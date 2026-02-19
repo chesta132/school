@@ -1,6 +1,6 @@
 use std::process::{Command, Output};
 
-use crate::error::{self, Error};
+use crate::{cmd::filter_uninstalled_pkg, error::{self, Error}};
 
 pub fn execute_command<'a>(
     commands: &[&'a str],
@@ -25,25 +25,6 @@ pub fn execute_command<'a>(
         error_on: on,
         error_while: while_do,
     })
-}
-
-fn is_pkg_installed(pkg: &str, while_do: &'static str) -> error::Result<bool> {
-    let check = execute_command(&vec!["dpkg", "-s", pkg], "is_pkg_installed", while_do)?;
-    Ok(check.status.success())
-}
-
-fn filter_uninstalled_pkg<'a>(
-    pkgs: &[&'a str],
-    while_do: &'static str,
-) -> error::Result<Vec<&'a str>> {
-    let mut uninstalled = vec![];
-    for pkg in pkgs {
-        let is_installed = is_pkg_installed(pkg, while_do)?;
-        if !is_installed {
-            uninstalled.push(*pkg);
-        }
-    }
-    Ok(uninstalled)
 }
 
 pub fn install_pkg(
@@ -80,8 +61,4 @@ pub fn execute_command_must_success<'a>(
         });
     }
     Ok(output)
-}
-
-pub fn is_valid_chmod(s: &str) -> bool {
-    s.len() == 3 && s.chars().all(|c| c.is_ascii_digit() && c <= '7')
 }
