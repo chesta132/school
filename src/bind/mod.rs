@@ -1,5 +1,4 @@
 use local_ip_address::local_ip;
-use regex::Regex;
 
 use crate::{
     cmd::{Prompt, execute_command, install_pkg},
@@ -9,14 +8,11 @@ use crate::{
 };
 
 mod forward;
+mod lib;
 mod register;
 mod reverse;
 
-fn is_valid_domain(domain: &str) -> bool {
-    let re =
-        Regex::new(r"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$").unwrap();
-    re.is_match(domain)
-}
+use lib::*;
 
 pub fn run() -> Result<(String, Vec<(&'static str, String)>), Error> {
     install_pkg(&vec!["bind9"], "bind9", "install bind9", || {
@@ -45,7 +41,7 @@ pub fn run() -> Result<(String, Vec<(&'static str, String)>), Error> {
     forward::forward(&ip, &domain)?;
 
     log_step("Registering", "named.conf.local");
-    let register_zone = register::register(&ip, &domain)?;
+    let (register_zone, valid_regist) = register::register(&ip, &domain)?;
 
     log_step("Restarting", "bind9 service");
     execute_command(
@@ -54,12 +50,15 @@ pub fn run() -> Result<(String, Vec<(&'static str, String)>), Error> {
         "restart bind service",
     )?;
 
+    if !valid_regist {
+        return Ok((
+            "DNS Already Registered".to_string(),
+            vec![("Domain", domain), ("IP", ip)],
+        ));
+    }
+
     Ok((
         "DNS Registered".to_string(),
-        vec![
-            ("Domain", domain),
-            ("IP", ip),
-            ("Zone path", register_zone),
-        ],
+        vec![("Domain", domain), ("IP", ip), ("Zone path", register_zone)],
     ))
 }

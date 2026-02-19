@@ -14,14 +14,15 @@ pub fn reverse(ip: &String, domain: &String) -> Result<(), Error> {
     let new_ptr = format!("{}\tIN\tPTR\t{}.", lo, domain);
 
     let content = if let Ok(existing) = fs::read_to_string(&path) {
+        // Check if PTR record already exists
         if existing.contains(&new_ptr) {
             return Ok(());
         }
+        // Append new PTR record to existing file
         format!("{}\n{}", existing.trim_end(), new_ptr)
     } else {
-        DB_REVERSE
-            .replace("$domain", domain)
-            .replace("$lo", &lo)
+        // Create new reverse zone file from template
+        DB_REVERSE.replace("$domain", domain).replace("$lo", &lo)
     };
 
     fs::write(&path, content).map_err(|err| Error {
