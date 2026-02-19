@@ -59,7 +59,7 @@ pub fn run() -> Result<(String, Vec<(&'static str, String)>), Error> {
         vec![
             ("Domain", domain),
             ("IP", ip),
-            ("Registered zone path", register_zone),
+            ("Zone path", register_zone),
         ],
     ))
 }
