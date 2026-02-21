@@ -27,7 +27,7 @@ redirectIfLoggedIn();
             <form id="registerForm" class="auth-form">
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required autofocus>
+                    <input type="text" id="username" name="username" autocapitalize="off" required autofocus>
                 </div>
                 
                 <div class="form-group">
@@ -57,7 +57,7 @@ redirectIfLoggedIn();
                 
                 <div class="form-group">
                     <label for="secret_key">Secret Key</label>
-                    <input type="text" id="secret_key" name="secret_key" required>
+                    <input type="text" id="secret_key" name="secret_key" autocapitalize="off" required>
                     <small>Hubungi administrator untuk mendapatkan secret key</small>
                 </div>
                 

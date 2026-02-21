@@ -27,7 +27,7 @@ redirectIfLoggedIn();
             <form id="loginForm" class="auth-form">
                 <div class="form-group">
                     <label for="username">Username atau Email</label>
-                    <input type="text" id="username" name="username" required autofocus>
+                    <input type="text" id="username" name="username" autocapitalize="off" required autofocus>
                 </div>
                 
                 <div class="form-group">
