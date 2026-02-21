@@ -97,16 +97,15 @@ function updateCartDisplay() {
     const tbody = document.getElementById('cartItems');
 
     if (cart.length === 0) {
-        tbody.innerHTML = `<td colspan="5" class="text-center">
-                                <div class="empty-cart">
-                                    <svg viewBox="0 0 24 24">
-                                        <circle cx="9" cy="21" r="1"></circle>
-                                        <circle cx="20" cy="21" r="1"></circle>
-                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                                    </svg>
-                                    <p>Keranjang kosong</p>
-                                </div>
-                            </td>`;
+        tbody.innerHTML = `<tr><td colspan="5">
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                <p>Keranjang kosong</p>
+            </div>
+        </td></tr>`;
         updateSummary();
         return;
     }

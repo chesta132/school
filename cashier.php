@@ -97,7 +97,12 @@ require_once __DIR__ . '/includes/header.php';
                             <tbody id="productList">
                                 <?php if (empty($products)): ?>
                                     <tr>
-                                        <td colspan="4" class="text-center">Tidak ada produk</td>
+                                        <td colspan="4">
+                                            <div class="empty-state">
+                                                <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                                <p>Tidak ada produk</p>
+                                            </div>
+                                        </td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($products as $p): ?>
@@ -176,13 +181,9 @@ require_once __DIR__ . '/includes/header.php';
                         </thead>
                         <tbody id="cartItems">
                             <tr>
-                                <td colspan="5" class="text-center">
-                                    <div class="empty-cart">
-                                        <svg viewBox="0 0 24 24">
-                                            <circle cx="9" cy="21" r="1"></circle>
-                                            <circle cx="20" cy="21" r="1"></circle>
-                                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                                        </svg>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                                         <p>Keranjang kosong</p>
                                     </div>
                                 </td>

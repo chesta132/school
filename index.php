@@ -201,7 +201,14 @@ require_once __DIR__ . '/includes/header.php';
         const tbody = document.querySelector('#recentTransactionsTable tbody');
         
         if (transactions.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center">Belum ada transaksi</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="4">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    <p>Belum ada transaksi</p>
+                </div>
+            </td></tr>`;
             return;
         }
         
@@ -219,7 +226,14 @@ require_once __DIR__ . '/includes/header.php';
         const tbody = document.querySelector('#lowStockTable tbody');
         
         if (products.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center">Semua produk stok aman</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="4">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    <p>Semua produk stok aman</p>
+                </div>
+            </td></tr>`;
             return;
         }
         

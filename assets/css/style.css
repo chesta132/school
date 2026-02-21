@@ -1175,3 +1175,35 @@ input[type="date"]::-moz-calendar-picker-indicator {
 input[type="date"]::-moz-calendar-picker-indicator:hover {
     opacity: 1;
 }
+
+/* ============================================
+   Empty State Component
+   ============================================ */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    gap: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.empty-state svg {
+    width: 52px;
+    height: 52px;
+    stroke: var(--text-muted);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.7;
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+}
