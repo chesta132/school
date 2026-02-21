@@ -197,10 +197,8 @@ require_once __DIR__ . '/includes/header.php';
 
 <div class="dashboard-container">
     <div class="page-header">
-        <div>
-            <h1>Profile</h1>
-            <p>Kelola informasi akun Anda</p>
-        </div>
+        <h1>Profile</h1>
+        <p>Kelola informasi akun Anda</p>
     </div>
 
     <!-- Hero Card -->
