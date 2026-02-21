@@ -228,6 +228,8 @@ async function viewDetails(transactionId) {
             
             Modal.form({
                 title: `Detail Transaksi - ${data.transaction.transaction_code}`,
+                type: 'info',
+                icon: 'receipt',
                 size: 'large',
                 content: `
                     <div style="margin-bottom: 16px;">

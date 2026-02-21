@@ -194,6 +194,8 @@ function clearCart() {
     Modal.confirm({
         title: 'Kosongkan Keranjang',
         message: 'Apakah Anda yakin ingin mengosongkan keranjang?',
+        type: 'warning',
+        icon: 'shopping-cart',
         confirmText: 'Ya, Kosongkan',
         onConfirm: () => {
             cart = [];

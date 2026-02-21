@@ -33,6 +33,8 @@ function showProductModal(productId = null) {
 
     Modal.form({
         title: isEdit ? 'Edit Produk' : 'Tambah Produk',
+        type: 'default',
+        icon: isEdit ? 'edit' : 'plus-circle',
         content: `
             <form id="productForm">
                 <input type="hidden" name="id" value="${product ? product.id : ''}">
@@ -121,7 +123,9 @@ function editProduct(productId) {
 function deleteProduct(productId, productName) {
     Modal.confirm({
         title: 'Hapus Produk',
-        message: `Apakah Anda yakin ingin menghapus produk "${productName}"?`,
+        message: `Apakah Anda yakin ingin menghapus produk "<strong>${productName}</strong>"? Tindakan ini tidak dapat dibatalkan.`,
+        type: 'danger',
+        icon: 'box-open',
         confirmText: 'Hapus',
         cancelText: 'Batal',
         onConfirm: async () => {
@@ -151,6 +155,8 @@ function deleteProduct(productId, productName) {
 function showCategoryModal() {
     Modal.form({
         title: 'Kelola Kategori',
+        type: 'default',
+        icon: 'folder-open',
         size: 'large',
         content: `
             <div style="margin-bottom: 24px;">
@@ -188,6 +194,8 @@ function showCategoryModal() {
 function addCategory() {
     Modal.form({
         title: 'Tambah Kategori',
+        type: 'default',
+        icon: 'folder-plus',
         content: `
             <form id="categoryForm">
                 <div class="form-group">
@@ -236,7 +244,9 @@ function addCategory() {
 function deleteCategory(categoryId) {
     Modal.confirm({
         title: 'Hapus Kategori',
-        message: 'Apakah Anda yakin? Produk dengan kategori ini juga akan terhapus.',
+        message: 'Apakah Anda yakin? <strong>Semua produk dalam kategori ini juga akan terhapus.</strong> Tindakan ini tidak dapat dibatalkan.',
+        type: 'danger',
+        icon: 'folder',
         confirmText: 'Hapus',
         onConfirm: async () => {
             try {

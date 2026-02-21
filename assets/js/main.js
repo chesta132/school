@@ -9,6 +9,8 @@ async function handleLogout() {
     Modal.confirm({
         title: 'Logout',
         message: 'Apakah Anda yakin ingin keluar?',
+        type: 'warning',
+        icon: 'sign-out-alt',
         confirmText: 'Logout',
         cancelText: 'Batal',
         onConfirm: async () => {
