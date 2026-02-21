@@ -1,5 +1,5 @@
 -- ChardyMart POS Database Schema
--- Created: 2025
+-- Created: 2026
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -99,9 +99,9 @@ CREATE TABLE IF NOT EXISTS `transaction_items` (
 -- Insert Sample Data
 -- --------------------------------------------------------
 
--- Insert default user (password: password)
+-- Insert default user (password: chesta_admin)
 INSERT INTO `users` (`username`, `email`, `password`) VALUES
-('admin', 'admin@chardymart.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+('admin', 'admin@chardymart.com', '$2y$10$yzwWmdHJDQL/dZMj0LIT5OQLYLxhNYesLomh2FLqjCVoTXPr.GAQ.');
 
 -- Insert categories
 INSERT INTO `categories` (`name`, `code`) VALUES
