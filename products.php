@@ -179,6 +179,6 @@ require_once __DIR__ . '/includes/header.php';
 <?php echo renderPaginationScript(); ?>
 
 <?php
-$additional_scripts = ['/assets/js/pagination.js', '/assets/js/products.js'];
+$additional_scripts = ['/assets/js/products.js'];
 require_once __DIR__ . '/includes/footer.php';
 ?>

@@ -1,23 +1,12 @@
 // Products Page JavaScript
+// Data produk dan kategori diambil dari PHP (server-side) dan di-embed ke halaman.
+// JS ini hanya mengelola CRUD via modal + API.
 
-let products = [];
 let categories = [];
-let productsPagination;
 
-// Load products and categories on page load
+// Load categories untuk form modal
 document.addEventListener('DOMContentLoaded', () => {
     loadCategories();
-    loadProducts();
-    
-    // Initialize pagination
-    productsPagination = new Pagination({
-        containerId: 'productsPagination',
-        itemsPerPage: 10,
-        perPageOptions: [10, 25, 50, 100],
-        onPageChange: (items) => {
-            displayProducts(items);
-        }
-    });
 });
 
 // Load categories
@@ -25,112 +14,23 @@ async function loadCategories() {
     try {
         const response = await fetch('/api/get-categories.php');
         const data = await response.json();
-        
         if (data.success) {
             categories = data.categories;
-            populateCategoryFilter();
         }
     } catch (error) {
         console.error('Error loading categories:', error);
     }
 }
 
-// Populate category filter
-function populateCategoryFilter() {
-    const select = document.getElementById('categoryFilter');
-    categories.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat.id;
-        option.textContent = cat.name;
-        select?.appendChild(option);
-    });
-}
-
-// Load products
-async function loadProducts() {
-    try {
-        const response = await fetch('/api/get-products.php');
-        const data = await response.json();
-        
-        if (data.success) {
-            products = data.products;
-            productsPagination.setItems(products);
-            displayProducts(productsPagination.getCurrentPageItems());
-        }
-    } catch (error) {
-        console.error('Error loading products:', error);
-    }
-}
-
-// Display products in table
-function displayProducts(productsToDisplay) {
-    const tbody = document.querySelector('#productsTable tbody');
-    
-    if (productsToDisplay.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Tidak ada produk</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = productsToDisplay.map(p => `
-        <tr>
-            <td><code>${p.sku}</code></td>
-            <td>${p.name}</td>
-            <td><span class="badge badge-info">${p.category_name}</span></td>
-            <td>${p.weight}g</td>
-            <td>${formatCurrency(p.price)}</td>
-            <td><span class="badge ${p.discount > 0 ? 'badge-warning' : 'badge-secondary'}">${p.discount}%</span></td>
-            <td><span class="badge ${getStockBadgeClass(p.stock)}">${p.stock}</span></td>
-            <td>${p.sold}</td>
-            <td>
-                <div class="actions">
-                    <button onclick="editProduct(${p.id})" class="action-btn" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button onclick="deleteProduct(${p.id})" class="action-btn" title="Hapus">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
-
-// Search products
-function searchProducts() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const categoryId = document.getElementById('categoryFilter').value;
-    
-    let filtered = products;
-    
-    if (query) {
-        filtered = filtered.filter(p => 
-            p.name.toLowerCase().includes(query) || 
-            p.sku.toLowerCase().includes(query)
-        );
-    }
-    
-    if (categoryId) {
-        filtered = filtered.filter(p => p.category_id == categoryId);
-    }
-    
-    productsPagination.setFilteredItems(filtered);
-    displayProducts(productsPagination.getCurrentPageItems());
-}
-
-// Filter products by category
-function filterProducts() {
-    searchProducts();
-}
-
 // Show product modal (add/edit)
 function showProductModal(productId = null) {
     const isEdit = productId !== null;
-    const product = isEdit ? products.find(p => p.id === productId) : null;
-    
-    const categoryOptions = categories.map(cat => 
+    const product = isEdit ? window.__products?.find(p => p.id === productId) : null;
+
+    const categoryOptions = categories.map(cat =>
         `<option value="${cat.id}" ${product && product.category_id == cat.id ? 'selected' : ''}>${cat.name}</option>`
     ).join('');
-    
+
     Modal.form({
         title: isEdit ? 'Edit Produk' : 'Tambah Produk',
         content: `
@@ -181,13 +81,13 @@ function showProductModal(productId = null) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     Notification.show({ message: data.message, type: 'success' });
                     Modal.close(modal);
-                    loadProducts();
+                    location.reload();
                 } else {
                     Notification.show({ message: data.message, type: 'error' });
                 }
@@ -198,18 +98,30 @@ function showProductModal(productId = null) {
     });
 }
 
-// Edit product
+// Edit product - ambil data dari row tabel yang di-render PHP
 function editProduct(productId) {
-    showProductModal(productId);
+    // Fetch product data fresh dari API
+    fetch(`/api/get-product.php?id=${productId}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                if (!window.__products) window.__products = [];
+                const idx = window.__products.findIndex(p => p.id === productId);
+                if (idx >= 0) window.__products[idx] = data.product;
+                else window.__products.push(data.product);
+                showProductModal(productId);
+            } else {
+                Notification.show({ message: 'Gagal memuat data produk', type: 'error' });
+            }
+        })
+        .catch(() => Notification.show({ message: 'Terjadi kesalahan', type: 'error' }));
 }
 
 // Delete product
-function deleteProduct(productId) {
-    const product = products.find(p => p.id === productId);
-    
+function deleteProduct(productId, productName) {
     Modal.confirm({
         title: 'Hapus Produk',
-        message: `Apakah Anda yakin ingin menghapus produk "${product.name}"?`,
+        message: `Apakah Anda yakin ingin menghapus produk "${productName}"?`,
         confirmText: 'Hapus',
         cancelText: 'Batal',
         onConfirm: async () => {
@@ -219,12 +131,12 @@ function deleteProduct(productId) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: productId })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     Notification.show({ message: data.message, type: 'success' });
-                    loadProducts();
+                    location.reload();
                 } else {
                     Notification.show({ message: data.message, type: 'error' });
                 }
@@ -302,13 +214,13 @@ function addCategory() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     Notification.show({ message: data.message, type: 'success' });
                     Modal.close(modal);
-                    loadCategories();
+                    await loadCategories();
                     showCategoryModal();
                 } else {
                     Notification.show({ message: data.message, type: 'error' });
@@ -333,14 +245,13 @@ function deleteCategory(categoryId) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: categoryId })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     Notification.show({ message: data.message, type: 'success' });
-                    loadCategories();
-                    loadProducts();
-                    showCategoryModal();
+                    await loadCategories();
+                    location.reload();
                 } else {
                     Notification.show({ message: data.message, type: 'error' });
                 }

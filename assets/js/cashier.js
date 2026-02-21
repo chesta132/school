@@ -1,32 +1,18 @@
 // Cashier Page JavaScript
 
 let cart = [];
-let allProducts = [];
-let cashierProductsPagination;
 
-// Load cart from localStorage
+// Load cart from localStorage on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadCart();
     setupEventListeners();
-    loadProducts();
-    
-    // Initialize product list pagination
-    cashierProductsPagination = new Pagination({
-        containerId: 'cashierProductsPagination',
-        itemsPerPage: 5,
-        perPageOptions: [5, 10, 25, 50],
-        onPageChange: (items) => {
-            displayProductsFromPagination(items);
-        }
-    });
 });
 
 // Setup event listeners
 function setupEventListeners() {
     const skuInput = document.getElementById('skuInput');
     const paymentInput = document.getElementById('paymentInput');
-    const productSearch = document.getElementById('productSearch');
-    
+
     // SKU input handler
     skuInput.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter') {
@@ -38,14 +24,9 @@ function setupEventListeners() {
             }
         }
     });
-    
+
     // Payment input handler
     paymentInput.addEventListener('input', updateChange);
-    
-    // Product search handler
-    productSearch.addEventListener('input', (e) => {
-        filterProducts(e.target.value);
-    });
 }
 
 // Load cart from localStorage
@@ -67,7 +48,7 @@ async function addProductBySKU(sku) {
     try {
         const response = await fetch(`/api/get-product.php?sku=${encodeURIComponent(sku)}`);
         const data = await response.json();
-        
+
         if (data.success) {
             addToCart(data.product);
         } else {
@@ -81,17 +62,15 @@ async function addProductBySKU(sku) {
 // Add product to cart
 function addToCart(product) {
     const stock = parseInt(product.stock);
-    
-    // Check if product is out of stock
+
     if (stock <= 0) {
         Notification.show({ message: 'Produk habis', type: 'error' });
         return;
     }
-    
+
     const existingIndex = cart.findIndex(item => item.id === product.id);
-    
+
     if (existingIndex >= 0) {
-        // Check if adding one more would exceed stock
         if (cart[existingIndex].qty >= stock) {
             Notification.show({ message: 'Stok tidak mencukupi', type: 'warning' });
             return;
@@ -108,7 +87,7 @@ function addToCart(product) {
             stock: stock
         });
     }
-    
+
     saveCart();
     updateCartDisplay();
 }
@@ -116,7 +95,7 @@ function addToCart(product) {
 // Update cart display
 function updateCartDisplay() {
     const tbody = document.getElementById('cartItems');
-    
+
     if (cart.length === 0) {
         tbody.innerHTML = `<td colspan="5" class="text-center">
                                 <div class="empty-cart">
@@ -131,12 +110,12 @@ function updateCartDisplay() {
         updateSummary();
         return;
     }
-    
+
     tbody.innerHTML = cart.map((item, index) => {
         const itemTotal = item.price * item.qty;
         const itemDiscount = itemTotal * (item.discount / 100);
         const subtotal = itemTotal - itemDiscount;
-        
+
         return `
             <tr>
                 <td>
@@ -173,7 +152,7 @@ function updateCartDisplay() {
             </tr>
         `;
     }).join('');
-    
+
     updateSummary();
 }
 
@@ -212,7 +191,7 @@ function clearCart() {
         Notification.show({ message: 'Keranjang sudah kosong', type: 'info' });
         return;
     }
-    
+
     Modal.confirm({
         title: 'Kosongkan Keranjang',
         message: 'Apakah Anda yakin ingin mengosongkan keranjang?',
@@ -233,7 +212,7 @@ function updateSummary() {
     let totalItems = 0;
     let totalAmount = 0;
     let totalDiscount = 0;
-    
+
     cart.forEach(item => {
         totalItems += item.qty;
         const itemTotal = item.price * item.qty;
@@ -241,17 +220,16 @@ function updateSummary() {
         totalAmount += itemTotal;
         totalDiscount += itemDiscount;
     });
-    
+
     const grandTotal = totalAmount - totalDiscount;
-    
+
     document.getElementById('totalItems').textContent = totalItems;
     document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
     document.getElementById('totalDiscount').textContent = formatCurrency(totalDiscount);
     document.getElementById('grandTotal').textContent = formatCurrency(grandTotal);
-    
-    // Store grand total for payment validation
+
     window.currentGrandTotal = grandTotal;
-    
+
     updateChange();
 }
 
@@ -260,10 +238,9 @@ function updateChange() {
     const payment = parseFloat(document.getElementById('paymentInput').value) || 0;
     const grandTotal = window.currentGrandTotal || 0;
     const change = payment - grandTotal;
-    
+
     document.getElementById('changeAmount').textContent = formatCurrency(Math.max(0, change));
-    
-    // Enable/disable process button
+
     const processBtn = document.getElementById('processBtn');
     processBtn.disabled = cart.length === 0 || payment < grandTotal;
 }
@@ -272,19 +249,19 @@ function updateChange() {
 async function processPayment() {
     const payment = parseFloat(document.getElementById('paymentInput').value) || 0;
     const grandTotal = window.currentGrandTotal || 0;
-    
+
     if (cart.length === 0) {
         Notification.show({ message: 'Keranjang kosong', type: 'error' });
         return;
     }
-    
+
     if (payment < grandTotal) {
         Notification.show({ message: 'Pembayaran kurang', type: 'error' });
         return;
     }
-    
+
     Modal.loading('Memproses transaksi...');
-    
+
     try {
         const response = await fetch('/api/save-transaction.php', {
             method: 'POST',
@@ -294,26 +271,23 @@ async function processPayment() {
                 payment_amount: payment
             })
         });
-        
+
         const data = await response.json();
-        
+
         Modal.closeLoading();
-        
+
         if (data.success) {
-            // Clear cart
             cart = [];
             saveCart();
             updateCartDisplay();
             document.getElementById('paymentInput').value = '';
-            
-            // Show success message
-            Notification.show({ 
-                message: `Transaksi berhasil! Kode: ${data.transaction.code}`, 
+
+            Notification.show({
+                message: `Transaksi berhasil! Kode: ${data.transaction.code}`,
                 type: 'success',
                 duration: 5000
             });
-            
-            // Download receipt
+
             window.open(`/generate-receipt.php?code=${data.transaction.code}`, '_blank');
         } else {
             Notification.show({ message: data.message, type: 'error' });
@@ -324,90 +298,22 @@ async function processPayment() {
     }
 }
 
-// Load all products
-async function loadProducts() {
-    try {
-        const response = await fetch('/api/get-products.php');
-        const data = await response.json();
-        
-        if (data.success) {
-            allProducts = data.products;
-            cashierProductsPagination.setItems(allProducts);
-            displayProductsFromPagination(cashierProductsPagination.getCurrentPageItems());
-        } else {
-            document.getElementById('productList').innerHTML = 
-                '<tr><td colspan="4" class="text-center">Gagal memuat produk</td></tr>';
-        }
-    } catch (error) {
-        document.getElementById('productList').innerHTML = 
-            '<tr><td colspan="4" class="text-center">Error memuat produk</td></tr>';
-    }
-}
-
-// Display products from pagination
-function displayProductsFromPagination(products) {
-    const tbody = document.getElementById('productList');
-    
-    if (products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada produk</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = products.map(product => {
-        const isOutOfStock = parseInt(product.stock) <= 0;
-        return `
-            <tr ${isOutOfStock ? 'style="opacity: 0.5;"' : ''}>
-                <td>
-                    <div>${product.name}</div>
-                    <small style="color: var(--text-muted);">${product.sku}</small>
-                </td>
-                <td>
-                    ${formatCurrency(product.price)}
-                    ${product.discount > 0 ? `<br><small style="color: var(--error);">-${product.discount}%</small>` : ''}
-                </td>
-                <td>
-                    <span style="${isOutOfStock ? 'color: var(--error);' : ''}">${product.stock}</span>
-                </td>
-                <td>
-                    <button onclick='addToCart(${JSON.stringify(product).replace(/'/g, "\\'")})'
-                            class="btn btn-primary btn-sm"
-                            style="padding: 6px 12px;"
-                            ${isOutOfStock ? 'disabled' : ''}>
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
-
-// Filter products
-function filterProducts(searchTerm) {
-    const filtered = allProducts.filter(product => {
-        const term = searchTerm.toLowerCase();
-        return product.name.toLowerCase().includes(term) || 
-               product.sku.toLowerCase().includes(term);
-    });
-    cashierProductsPagination.setFilteredItems(filtered);
-    displayProductsFromPagination(cashierProductsPagination.getCurrentPageItems());
-}
-
 // Update qty from input field
 function updateQtyFromInput(index, value) {
     const qty = parseInt(value);
-    
+
     if (isNaN(qty) || qty < 1) {
         Notification.show({ message: 'Jumlah tidak valid', type: 'error' });
         updateCartDisplay();
         return;
     }
-    
+
     if (qty > cart[index].stock) {
         Notification.show({ message: 'Stok tidak mencukupi', type: 'warning' });
         updateCartDisplay();
         return;
     }
-    
+
     cart[index].qty = qty;
     saveCart();
     updateCartDisplay();

@@ -909,7 +909,9 @@ input[type=number] {
     .filter-category { justify-content: space-between; }
     .filter-category .btn { width: 50%; }
     .search-box { min-width: 100%; }
-    .cashier-container { grid-template-columns: 1fr !important; height: auto !important; gap: 16px; }
+    .cashier-container { grid-template-columns: 1fr !important; height: auto !important; gap: 16px; min-width: 0; overflow: hidden; }
+    .cashier-container > * { min-width: 0; overflow: hidden; }
+    .cashier-container .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .transactions-stats { grid-template-columns: 1fr !important; }
 }
 

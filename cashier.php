@@ -49,10 +49,10 @@ $products = $stmt->fetchAll();
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div class="cashier-container" style="display: grid; grid-template-columns: 1fr 380px; gap: 24px;">
+<div class="cashier-container" style="display: grid; grid-template-columns: 1fr 380px; gap: 24px; min-width: 0;">
 
     <!-- Left: Product Search & Cart -->
-    <div style="display: flex; flex-direction: column; gap: 16px; min-height: 0;">
+    <div style="display: flex; flex-direction: column; gap: 16px; min-height: 0; min-width: 0; overflow: hidden;">
         <div class="page-header" style="margin-bottom: 0;">
             <div>
                 <h1>Kasir</h1>
@@ -163,7 +163,7 @@ require_once __DIR__ . '/includes/header.php';
                 </button>
             </div>
             <div class="card-body" style="padding: 0; overflow-y: auto; flex: 1;">
-                <div class="table-responsive">
+                <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
                     <table class="table">
                         <thead>
                             <tr>

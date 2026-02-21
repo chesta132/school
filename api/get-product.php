@@ -1,5 +1,5 @@
 <?php
-// api/get-product.php - Get product by SKU
+// api/get-product.php - Get product by SKU or ID
 
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -14,13 +14,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     jsonResponse(['success' => false, 'message' => 'Method not allowed'], 405);
 }
 
-$sku = sanitize($_GET['sku'] ?? '');
+$product = null;
 
-if (empty($sku)) {
-    jsonResponse(['success' => false, 'message' => 'SKU harus diisi']);
+if (!empty($_GET['id'])) {
+    $id = (int)$_GET['id'];
+    $stmt = $pdo->prepare("
+        SELECT p.*, c.name as category_name 
+        FROM products p 
+        JOIN categories c ON p.category_id = c.id 
+        WHERE p.id = ?
+    ");
+    $stmt->execute([$id]);
+    $product = $stmt->fetch();
+} elseif (!empty($_GET['sku'])) {
+    $sku = sanitize($_GET['sku']);
+    $product = getProductBySKU($pdo, $sku);
+} else {
+    jsonResponse(['success' => false, 'message' => 'Parameter SKU atau ID harus diisi']);
 }
-
-$product = getProductBySKU($pdo, $sku);
 
 if ($product) {
     jsonResponse([

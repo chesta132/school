@@ -37,18 +37,6 @@ function formatCurrency(amount) {
 }
 
 /**
- * Format date
- */
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-    });
-}
-
-/**
  * Format datetime
  */
 function formatDateTime(dateString) {
@@ -68,40 +56,4 @@ function getStockBadgeClass(stock) {
     if (stock < 10) return 'badge-danger';
     if (stock < 30) return 'badge-warning';
     return 'badge-success';
-}
-
-/**
- * Debounce function
- */
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-/**
- * API fetch helper with error handling
- */
-async function apiFetch(url, options = {}) {
-    try {
-        const response = await fetch(url, {
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
-        
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('API Error:', error);
-        throw error;
-    }
 }
