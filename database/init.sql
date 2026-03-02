@@ -99,9 +99,11 @@ CREATE TABLE IF NOT EXISTS `transaction_items` (
 -- Insert Sample Data
 -- --------------------------------------------------------
 
--- Insert default user (password: chesta_admin)
+-- Insert default user
+-- username: admin
+-- password: chesta
 INSERT INTO `users` (`username`, `email`, `password`) VALUES
-('admin', 'admin@chardymart.com', '$2y$10$yzwWmdHJDQL/dZMj0LIT5OQLYLxhNYesLomh2FLqjCVoTXPr.GAQ.');
+('admin', 'admin@chardymart.com', '$2y$10$QgusiUUvT4m1FqL4zfGPj.5Lb/hfb7viYKjNfO5C4HaBRLZBwlAxi');
 
 -- Insert categories
 INSERT INTO `categories` (`name`, `code`) VALUES

@@ -42,7 +42,7 @@ docker-compose up -d
 
 4. **Login default:**
 - Username: `admin`
-- Password: `chesta_admin`
+- Password: `chesta`
 
 5. **Untuk Register user baru, gunakan Secret Key:**
 - Secret Key: `secret`
